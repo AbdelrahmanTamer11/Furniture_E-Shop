@@ -1,3 +1,4 @@
+-- Active: 1730742563437@@127.0.0.1@3306@furniture_eshop
 -- Furniture E-Shop Database Schema
 -- Created for AI-Enhanced E-commerce Platform
 
@@ -128,3 +129,5 @@ INSERT INTO products (name, description, price, category_id, style, color, mater
 ('Platform Bed Frame', 'Modern platform bed with built-in nightstands', 649.99, 2, 'Modern', 'White', 'MDF', '200x160x35 cm', 12, '/images/products/platform-bed-frame.jpg'),
 ('Ergonomic Office Chair', 'High-back ergonomic chair with lumbar support', 399.99, 4, 'Modern', 'Black', 'Mesh/Plastic', '70x70x120 cm', 30, '/images/products/ergonomic-office-chair.jpg'),
 ('Industrial Bookshelf', 'Multi-tier bookshelf with industrial design', 199.99, 5, 'Industrial', 'Black/Wood', 'Metal/Wood', '80x30x180 cm', 20, '/images/products/industrial-bookshelf.jpg');
+
+

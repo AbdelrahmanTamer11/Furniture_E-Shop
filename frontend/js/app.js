@@ -1,10 +1,11 @@
 // Main application JavaScript
 class FurnitureApp {
     constructor() {
-        this.API_BASE = 'http://localhost/backend/api';
+        this.API_BASE = 'http://localhost:8000/backend/api';
         this.currentUser = null;
         this.cartItems = [];
         this.products = [];
+        this.isLoadingProducts = false; // Flag to prevent multiple simultaneous API calls
         this.filters = {
             category: '',
             style: '',
@@ -16,17 +17,11 @@ class FurnitureApp {
     }
 
     init() {
-        console.log('Initializing FurnitureApp...');
-        try {
-            this.loadAuthToken();
-            this.setupEventListeners();
-            this.loadInitialData();
-            this.setupSmoothScrolling();
-            this.setupMobileNavigation();
-            console.log('FurnitureApp initialized successfully');
-        } catch (error) {
-            console.error('Error initializing FurnitureApp:', error);
-        }
+        this.loadAuthToken();
+        this.setupEventListeners();
+        this.loadInitialData();
+        this.setupSmoothScrolling();
+        this.setupMobileNavigation();
     }
 
     // Authentication management
@@ -145,32 +140,27 @@ class FurnitureApp {
 
     // Event listeners setup
     setupEventListeners() {
-        console.log('Setting up event listeners...');
-        try {
-            // Price range filter
-            const priceRange = document.getElementById('priceRange');
-            if (priceRange) {
-                priceRange.addEventListener('input', (e) => {
-                    document.getElementById('priceValue').textContent = '$' + e.target.value;
-                    this.filters.maxPrice = parseInt(e.target.value);
-                });
-            } else {
-                console.warn('priceRange element not found');
-            }
+        // Remove any existing event listeners first to prevent duplicates
+        const priceRange = document.getElementById('priceRange');
+        if (priceRange) {
+            // Clone element to remove all existing event listeners
+            const newPriceRange = priceRange.cloneNode(true);
+            priceRange.parentNode.replaceChild(newPriceRange, priceRange);
 
-            // Search functionality
-            this.setupSearch();
-
-            // Window resize handler
-            window.addEventListener('resize', this.handleResize.bind(this));
-
-            // Scroll handler for navbar
-            window.addEventListener('scroll', this.handleScroll.bind(this));
-
-            console.log('Event listeners set up successfully');
-        } catch (error) {
-            console.error('Error setting up event listeners:', error);
+            // Add single event listener for price display update only
+            newPriceRange.addEventListener('input', (e) => {
+                document.getElementById('priceValue').textContent = '$' + e.target.value;
+            });
         }
+
+        // Search functionality
+        this.setupSearch();
+
+        // Window resize handler
+        window.addEventListener('resize', this.handleResize.bind(this));
+
+        // Scroll handler for navbar
+        window.addEventListener('scroll', this.handleScroll.bind(this));
     }
 
     setupSearch() {
@@ -183,8 +173,10 @@ class FurnitureApp {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 this.filters.search = e.target.value;
-                this.filterProducts();
-            }, 300);
+                // Only call loadProducts, not filterProducts to avoid double calls
+                console.log('Search changed, loading products with search:', e.target.value);
+                this.loadProducts();
+            }, 500); // Increased debounce time for search
         });
 
         // Add search to navigation if not exists
@@ -277,17 +269,30 @@ class FurnitureApp {
     }
 
     async loadProducts() {
+        // Prevent multiple simultaneous API calls
+        if (this.isLoadingProducts) {
+            console.log('Already loading products, skipping...');
+            return;
+        }
+
         try {
-            this.showLoading('productsGrid');
+            this.isLoadingProducts = true;
+            console.log('Loading products from API:', `${this.API_BASE}/products.php`);
+            this.showLoading('productsByCategory');
             const params = new URLSearchParams(this.filters);
             const response = await fetch(`${this.API_BASE}/products.php?${params}`);
+            console.log('API Response status:', response.status);
             const data = await response.json();
+            console.log('Products data received:', data);
 
             this.products = data.products || [];
-            this.renderProducts();
+            console.log('Number of products loaded:', this.products.length);
+            this.renderProductsByCategory();
         } catch (error) {
             console.error('Failed to load products:', error);
             this.showAlert('Failed to load products', 'error');
+        } finally {
+            this.isLoadingProducts = false;
         }
     }
 
@@ -304,26 +309,80 @@ class FurnitureApp {
     }
 
     // UI rendering
-    renderProducts() {
-        const grid = document.getElementById('productsGrid');
-        if (!grid) return;
+    renderProductsByCategory() {
+        const container = document.getElementById('productsByCategory');
+        if (!container) return;
 
         if (this.products.length === 0) {
-            grid.innerHTML = '<div class="no-products">No products found matching your criteria.</div>';
+            container.innerHTML = '<div class="no-products">No products found matching your criteria.</div>';
             return;
         }
 
-        grid.innerHTML = this.products.map(product => this.createProductCard(product)).join('');
+        // Group products by category
+        const productsByCategory = this.groupProductsByCategory(this.products);
+
+        // Render categories
+        container.innerHTML = Object.keys(productsByCategory).map(categoryName => {
+            const products = productsByCategory[categoryName];
+            const visibleProducts = products.slice(0, 5);
+            const hasMore = products.length > 5;
+
+            return `
+                <div class="category-section" data-category="${categoryName}">
+                    <h2 class="category-title">${categoryName}</h2>
+                    <div class="products-grid" id="grid-${categoryName.replace(/\s+/g, '-').toLowerCase()}">
+                        ${visibleProducts.map(product => this.createProductCard(product)).join('')}
+                    </div>
+                    ${hasMore ? `
+                        <button class="show-more-btn" onclick="app.showMoreProducts('${categoryName}')">
+                            Show More (${products.length - 5} more)
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+    }
+
+    groupProductsByCategory(products) {
+        const grouped = {};
+
+        products.forEach(product => {
+            const category = product.category_name || 'Uncategorized';
+            if (!grouped[category]) {
+                grouped[category] = [];
+            }
+            grouped[category].push(product);
+        });
+
+        return grouped;
+    }
+
+    showMoreProducts(categoryName) {
+        const productsByCategory = this.groupProductsByCategory(this.products);
+        const categoryProducts = productsByCategory[categoryName] || [];
+        const gridId = `grid-${categoryName.replace(/\s+/g, '-').toLowerCase()}`;
+        const grid = document.getElementById(gridId);
+        const showMoreBtn = document.querySelector(`[data-category="${categoryName}"] .show-more-btn`);
+
+        if (!grid || !categoryProducts) return;
+
+        // Show all products for this category
+        grid.innerHTML = categoryProducts.map(product => this.createProductCard(product)).join('');
+
+        // Hide the show more button
+        if (showMoreBtn) {
+            showMoreBtn.style.display = 'none';
+        }
     }
 
     createProductCard(product) {
-        const imageUrl = product.image_url || '/images/placeholder-furniture.jpg';
+        const imageUrl = product.image_url || '/images/placeholder-furniture.svg';
         const inStock = product.stock_quantity > 0;
 
         return `
             <div class="product-card">
                 <img src="${imageUrl}" alt="${product.name}" class="product-image" 
-                     onerror="this.src='/images/placeholder-furniture.jpg'">
+                     onerror="this.src='/images/placeholder-furniture.svg'">
                 <div class="product-info">
                     <h3 class="product-name">${product.name}</h3>
                     <p class="product-description">${product.description || ''}</p>
@@ -434,7 +493,7 @@ class FurnitureApp {
     createCartItem(item) {
         return `
             <div class="cart-item">
-                <img src="${item.image_url || '/images/placeholder-furniture.jpg'}" 
+                <img src="${item.image_url || '/images/placeholder-furniture.svg'}" 
                      alt="${item.name}" class="cart-item-image">
                 <div class="cart-item-info">
                     <div class="cart-item-name">${item.name}</div>
@@ -561,11 +620,17 @@ function filterProducts() {
     const styleFilter = document.getElementById('styleFilter');
     const priceRange = document.getElementById('priceRange');
 
-    app.filters.category = categoryFilter.value;
-    app.filters.style = styleFilter.value;
-    app.filters.maxPrice = parseInt(priceRange.value);
+    // Update filters
+    if (categoryFilter) app.filters.category = categoryFilter.value;
+    if (styleFilter) app.filters.style = styleFilter.value;
+    if (priceRange) app.filters.maxPrice = parseInt(priceRange.value);
 
-    app.loadProducts();
+    // Debounce the API call to prevent too many requests
+    clearTimeout(window.filterTimeout);
+    window.filterTimeout = setTimeout(() => {
+        console.log('Filter changed, loading products with filters:', app.filters);
+        app.loadProducts();
+    }, 300); // Wait 300ms before making the API call
 }
 
 function loadMoreProducts() {
@@ -581,6 +646,18 @@ function openAIDesign() {
 
 function scrollToProducts() {
     document.getElementById('products').scrollIntoView({
+        behavior: 'smooth'
+    });
+}
+
+function scrollToAbout() {
+    document.getElementById('about').scrollIntoView({
+        behavior: 'smooth'
+    });
+}
+
+function scrollToContact() {
+    document.getElementById('contact').scrollIntoView({
         behavior: 'smooth'
     });
 }

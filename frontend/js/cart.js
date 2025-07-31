@@ -1,7 +1,7 @@
 // Shopping cart management module
 class CartManager {
     constructor() {
-        this.API_BASE = 'http://localhost/backend/api';
+        this.API_BASE = 'http://localhost:8000/backend/api';
         this.cartItems = [];
         this.cartTotal = 0;
         this.cartCount = 0;
@@ -143,13 +143,13 @@ class CartManager {
     }
 
     createCartItemHTML(item) {
-        const imageUrl = item.image_url || '/images/placeholder-furniture.jpg';
+        const imageUrl = item.image_url || '/images/placeholder-furniture.svg';
         const subtotal = parseFloat(item.price) * parseInt(item.quantity);
 
         return `
             <div class="cart-item" data-product-id="${item.product_id || item.id}">
                 <img src="${imageUrl}" alt="${item.name}" class="cart-item-image" 
-                     onerror="this.src='/images/placeholder-furniture.jpg'">
+                     onerror="this.src='/images/placeholder-furniture.svg'">
                 <div class="cart-item-info">
                     <div class="cart-item-name">${item.name}</div>
                     <div class="cart-item-price">$${parseFloat(item.price).toFixed(2)}</div>
@@ -616,7 +616,7 @@ class CartManager {
         // Populate items
         itemsContainer.innerHTML = this.cartItems.map(item => `
             <div class="checkout-item">
-                <img src="${item.image_url || '/images/placeholder-furniture.jpg'}" alt="${item.name}">
+                <img src="${item.image_url || '/images/placeholder-furniture.svg'}" alt="${item.name}">
                 <div class="item-details">
                     <span class="item-name">${item.name}</span>
                     <span class="item-quantity">Qty: ${item.quantity}</span>

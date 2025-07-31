@@ -1,7 +1,7 @@
 // Product management module
 class ProductManager {
     constructor() {
-        this.API_BASE = 'http://localhost/backend/api';
+        this.API_BASE = 'http://localhost:8000/backend/api';
         this.currentPage = 1;
         this.itemsPerPage = 12;
         this.totalProducts = 0;
@@ -162,7 +162,7 @@ class ProductManager {
     }
 
     populateQuickView(product) {
-        document.getElementById('quickViewImage').src = product.image_url || '/images/placeholder-furniture.jpg';
+        document.getElementById('quickViewImage').src = product.image_url || '/images/placeholder-furniture.svg';
         document.getElementById('quickViewName').textContent = product.name;
         document.getElementById('quickViewPrice').textContent = `$${parseFloat(product.price).toFixed(2)}`;
         document.getElementById('quickViewDescription').textContent = product.description || '';
@@ -275,7 +275,7 @@ class ProductManager {
             const item = document.createElement('div');
             item.className = 'comparison-item';
             item.innerHTML = `
-                <img src="${product.image_url || '/images/placeholder-furniture.jpg'}" alt="${product.name}">
+                <img src="${product.image_url || '/images/placeholder-furniture.svg'}" alt="${product.name}">
                 <div class="item-info">
                     <span class="item-name">${product.name}</span>
                     <span class="item-price">$${parseFloat(product.price).toFixed(2)}</span>
@@ -324,7 +324,7 @@ class ProductManager {
 
         // Add headers for each product
         this.comparisonList.forEach(product => {
-            table += `<th><img src="${product.image_url || '/images/placeholder-furniture.jpg'}" alt="${product.name}"><br>${product.name}</th>`;
+            table += `<th><img src="${product.image_url || '/images/placeholder-furniture.svg'}" alt="${product.name}"><br>${product.name}</th>`;
         });
 
         table += '</tr></thead><tbody>';

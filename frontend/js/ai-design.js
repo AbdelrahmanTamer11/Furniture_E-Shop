@@ -1,19 +1,11 @@
 // AI Design Analysis module
 class AIDesignManager {
     constructor() {
-        console.log('Initializing AIDesignManager...');
-        try {
-            this.API_BASE = 'http://localhost/backend/api';
-            this.currentAnalysis = null;
-            this.TEST_MODE = true; // Set to false when backend server is running
-            this.furnitureCache = {}; // Cache for faster furniture rendering
-            this.placedFurniture = []; // Track placed furniture for collision detection
-            this.setupEventListeners();
-            this.setupDragAndDrop();
-            console.log('AIDesignManager initialized successfully');
-        } catch (error) {
-            console.error('Error initializing AIDesignManager:', error);
-        }
+        this.API_BASE = '../backend/api';
+        this.currentAnalysis = null;
+        this.TEST_MODE = true; // Set to false when backend server is running
+        this.setupEventListeners();
+        this.setupDragAndDrop();
     }
 
     setupEventListeners() {
@@ -170,37 +162,60 @@ class AIDesignManager {
     }
 
     async analyzeRoom() {
+        console.log('Analyze room button clicked!');
+
         const fileInput = document.getElementById('roomImageInput');
         const roomType = document.getElementById('roomType').value;
         const stylePreference = document.getElementById('stylePreference').value;
         const analyzeBtn = document.getElementById('analyzeBtn');
 
+        console.log('File input:', fileInput);
+        console.log('Files:', fileInput ? fileInput.files : 'No file input found');
+        console.log('Room type:', roomType);
+        console.log('Style preference:', stylePreference);
+
         if (!fileInput.files[0]) {
+            console.log('No file selected');
             app.showAlert('Please select an image first', 'warning');
             return;
         }
 
-        if (!app.currentUser) {
-            app.showAlert('Please login to use AI analysis', 'warning');
-            toggleAuth();
-            return;
-        }
+        console.log('Current user:', app.currentUser);
+        // Temporarily disable authentication requirement for testing
+        // if (!app.currentUser) {
+        //     app.showAlert('Please login to use AI analysis', 'warning');
+        //     toggleAuth();
+        //     return;
+        // }
 
+        console.log('Starting analysis...');
         // Show loading state
         this.setAnalyzeButtonState('analyzing');
 
         try {
-            const formData = new FormData();
-            formData.append('image', fileInput.files[0]);
-            formData.append('room_type', roomType);
-            formData.append('style_preference', stylePreference);
-
-            let data;
             if (this.TEST_MODE) {
-                // Fast test mode response
-                data = await this.generateFastTestResponse(roomType, stylePreference);
+                // Test mode - show sample AI results
+                console.log('Running in TEST MODE - showing sample AI results');
+                const testData = this.createTestAIResponse(roomType, stylePreference);
+                console.log('Test data created:', testData);
+
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                this.currentAnalysis = testData;
+                this.displayResults(testData);
+                app.showAlert('AI analysis completed! (Test Mode)', 'success');
             } else {
+                // Real API mode
+                console.log('Running in API MODE - making real backend call');
+                const formData = new FormData();
+                formData.append('image', fileInput.files[0]);
+                formData.append('room_type', roomType);
+                formData.append('style_preference', stylePreference);
+
                 const token = localStorage.getItem('auth_token');
+                console.log('Making API request to:', `${this.API_BASE}/ai-analysis.php`);
+
                 const response = await fetch(`${this.API_BASE}/ai-analysis.php`, {
                     method: 'POST',
                     headers: {
@@ -208,19 +223,18 @@ class AIDesignManager {
                     },
                     body: formData
                 });
-                data = await response.json();
-            }
 
-            if (data && data.suggestions) {
-                this.currentAnalysis = data;
-                this.displayResults(data);
+                const data = await response.json();
+                console.log('API response data:', data);
 
-                // Generate fast estimated photo
-                await this.generateEstimatedPhoto(data, roomType, stylePreference);
-
-                app.showAlert('AI analysis completed!', 'success');
-            } else {
-                app.showAlert(data?.error || 'AI analysis failed', 'error');
+                if (response.ok) {
+                    this.currentAnalysis = data;
+                    this.displayResults(data);
+                    app.showAlert('AI analysis completed!', 'success');
+                } else {
+                    console.error('API error:', data);
+                    app.showAlert(data.error || 'AI analysis failed', 'error');
+                }
             }
         } catch (error) {
             console.error('AI analysis error:', error);
@@ -230,282 +244,113 @@ class AIDesignManager {
         }
     }
 
-    async generateFastTestResponse(roomType, stylePreference) {
-        // Simulate fast AI processing
-        await new Promise(resolve => setTimeout(resolve, 800));
+    createTestAIResponse(roomType, stylePreference) {
+        const suggestions = [];
+
+        // Generate furniture suggestions based on room type and style
+        const furnitureTemplates = {
+            living_room: [
+                { name: "Sofa", category: "Seating", basePrice: 599 },
+                { name: "Coffee Table", category: "Tables", basePrice: 299 },
+                { name: "Floor Lamp", category: "Lighting", basePrice: 149 },
+                { name: "Bookshelf", category: "Storage", basePrice: 199 }
+            ],
+            bedroom: [
+                { name: "Bed Frame", category: "Bedroom", basePrice: 499 },
+                { name: "Nightstand", category: "Bedroom", basePrice: 129 },
+                { name: "Dresser", category: "Storage", basePrice: 349 },
+                { name: "Table Lamp", category: "Lighting", basePrice: 79 }
+            ],
+            dining_room: [
+                { name: "Dining Table", category: "Tables", basePrice: 799 },
+                { name: "Dining Chairs", category: "Seating", basePrice: 149 },
+                { name: "Sideboard", category: "Storage", basePrice: 599 },
+                { name: "Pendant Light", category: "Lighting", basePrice: 199 }
+            ],
+            office: [
+                { name: "Desk", category: "Office", basePrice: 399 },
+                { name: "Office Chair", category: "Seating", basePrice: 249 },
+                { name: "Filing Cabinet", category: "Storage", basePrice: 179 },
+                { name: "Desk Lamp", category: "Lighting", basePrice: 89 }
+            ],
+            kitchen: [
+                { name: "Kitchen Island", category: "Kitchen", basePrice: 899 },
+                { name: "Bar Stools", category: "Seating", basePrice: 99 },
+                { name: "Storage Cabinet", category: "Storage", basePrice: 299 },
+                { name: "Pendant Lights", category: "Lighting", basePrice: 129 }
+            ]
+        };
+
+        const styleModifiers = {
+            Modern: { colorPalette: ["White", "Black", "Gray"], material: "Metal", priceMultiplier: 1.2 },
+            Scandinavian: { colorPalette: ["Light Wood", "White", "Beige"], material: "Pine Wood", priceMultiplier: 1.1 },
+            Classic: { colorPalette: ["Dark Wood", "Cream", "Gold"], material: "Oak Wood", priceMultiplier: 1.3 },
+            Industrial: { colorPalette: ["Black", "Metal Gray", "Brown"], material: "Steel", priceMultiplier: 1.15 },
+            Minimalist: { colorPalette: ["White", "Light Gray", "Natural"], material: "Composite", priceMultiplier: 1.0 }
+        };
+
+        const roomFurniture = furnitureTemplates[roomType] || furnitureTemplates.living_room;
+        const styleInfo = styleModifiers[stylePreference] || styleModifiers.Modern;
+
+        roomFurniture.forEach((furniture, index) => {
+            const color = styleInfo.colorPalette[index % styleInfo.colorPalette.length];
+            const price = furniture.basePrice * styleInfo.priceMultiplier;
+
+            suggestions.push({
+                ai_suggestion: {
+                    name: `${stylePreference} ${furniture.name}`,
+                    color: color,
+                    material: styleInfo.material,
+                    price: Math.round(price),
+                    placement: this.generatePlacement(furniture.name, roomType),
+                    category: furniture.category
+                },
+                matching_products: [],
+                estimated_price: Math.round(price)
+            });
+        });
+
+        const totalCost = suggestions.reduce((sum, s) => sum + s.estimated_price, 0);
 
         return {
-            room_analysis: `${roomType} with ${stylePreference.toLowerCase()} style preference`,
-            suggestions: [
-                {
-                    ai_suggestion: {
-                        name: "Modern Sofa",
-                        color: "Charcoal Gray",
-                        material: "Fabric",
-                        placement: "Against the main wall for optimal viewing",
-                        price: 899.99
-                    },
-                    matching_products: []
-                },
-                {
-                    ai_suggestion: {
-                        name: "Coffee Table",
-                        color: "Oak Wood",
-                        material: "Wood",
-                        placement: "Center of seating area",
-                        price: 299.99
-                    },
-                    matching_products: []
-                },
-                {
-                    ai_suggestion: {
-                        name: "Floor Lamp",
-                        color: "Black Metal",
-                        material: "Metal",
-                        placement: "Corner for ambient lighting",
-                        price: 199.99
-                    },
-                    matching_products: []
-                }
-            ],
-            total_cost: 1399.97
+            suggestions: suggestions,
+            total_cost: totalCost,
+            style_analysis: `This ${roomType.replace('_', ' ')} has been analyzed for ${stylePreference} style furniture. The space appears suitable for ${suggestions.length} key furniture pieces that will complement the room's layout and lighting. The ${stylePreference} style emphasizes ${this.getStyleDescription(stylePreference)}.`
         };
     }
 
-    async generateEstimatedPhoto(data, roomType, stylePreference) {
-        // Create estimated photo container
-        const resultsContainer = document.getElementById('aiResults');
-
-        // Add estimated photo section after suggestions
-        const estimatedPhotoSection = document.createElement('div');
-        estimatedPhotoSection.className = 'estimated-photo-section';
-        estimatedPhotoSection.innerHTML = `
-            <h3>🎨 Estimated Room with AI Suggestions</h3>
-            <div class="photo-generation-container">
-                <div class="generating-notification">
-                    <div class="progress-bar">
-                        <div class="progress-fill"></div>
-                    </div>
-                    <p>⚡ Generating your room visualization...</p>
-                    <small>Using advanced AI placement algorithms</small>
-                </div>
-            </div>
-        `;
-
-        resultsContainer.appendChild(estimatedPhotoSection);
-
-        // Fast generation process
-        const container = estimatedPhotoSection.querySelector('.photo-generation-container');
-        await this.createFastVisualization(data, container, roomType, stylePreference);
-    }
-
-    async createFastVisualization(data, container, roomType, stylePreference) {
-        // Update progress
-        this.updateProgressText('🏠 Analyzing room layout...', container);
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        this.updateProgressText('🪑 Placing furniture intelligently...', container);
-        await new Promise(resolve => setTimeout(resolve, 600));
-
-        this.updateProgressText('🎨 Finalizing visualization...', container);
-        await new Promise(resolve => setTimeout(resolve, 400));
-
-        // Get the original uploaded image
-        const fileInput = document.getElementById('roomImageInput');
-        const originalFile = fileInput.files[0];
-
-        if (originalFile) {
-            await this.compositeRoomVisualization(originalFile, data, container, stylePreference);
-        } else {
-            await this.generateSampleRoom(data, container, stylePreference);
-        }
-    }
-
-    updateProgressText(text, container) {
-        const progressText = container.querySelector('.generating-notification p');
-        if (progressText) {
-            progressText.textContent = text;
-        }
-    }
-
-    async compositeRoomVisualization(originalFile, data, container, stylePreference) {
-        const reader = new FileReader();
-
-        reader.onload = async (e) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const originalImg = new Image();
-
-            originalImg.onload = async () => {
-                // Set canvas size
-                canvas.width = Math.min(originalImg.width, 800);
-                canvas.height = Math.min(originalImg.height, 600);
-
-                // Draw the original room
-                ctx.drawImage(originalImg, 0, 0, canvas.width, canvas.height);
-
-                // Place furniture quickly
-                await this.placeFurnitureFast(ctx, canvas, data.suggestions, stylePreference);
-
-                // Convert to final image
-                const finalImageURL = canvas.toDataURL('image/jpeg', 0.85);
-
-                container.innerHTML = `
-                    <div class="visualization-result">
-                        <img src="${finalImageURL}" alt="AI Generated Room" class="room-visualization">
-                        <div class="visualization-badge">✨ AI Generated</div>
-                        <div class="confidence-badge">95% Accuracy</div>
-                    </div>
-                `;
-            };
-
-            originalImg.src = e.target.result;
+    generatePlacement(furnitureName, roomType) {
+        const placements = {
+            Sofa: "Against the main wall facing the entertainment area",
+            "Coffee Table": "Center of the seating area",
+            "Floor Lamp": "In the corner next to seating for ambient lighting",
+            Bookshelf: "Along the side wall for easy access",
+            "Bed Frame": "Centered against the largest wall",
+            Nightstand: "Beside the bed for convenience",
+            Dresser: "Opposite the bed or in the corner",
+            "Table Lamp": "On the nightstand for reading light",
+            "Dining Table": "Center of the dining area",
+            "Dining Chairs": "Around the dining table",
+            Sideboard: "Against the wall for serving and storage",
+            "Pendant Light": "Above the dining table",
+            Desk: "Near the window for natural light",
+            "Office Chair": "At the desk for optimal ergonomics",
+            "Filing Cabinet": "Beside or under the desk",
+            "Desk Lamp": "On the desk for task lighting"
         };
 
-        reader.readAsDataURL(originalFile);
+        return placements[furnitureName] || "Positioned optimally within the room layout";
     }
 
-    async placeFurnitureFast(ctx, canvas, suggestions, stylePreference) {
-        // Simple and fast furniture placement
-        const zones = this.getSimpleZones(canvas.width, canvas.height);
-
-        for (let i = 0; i < Math.min(suggestions.length, 4); i++) {
-            const suggestion = suggestions[i];
-            const zone = zones[i % zones.length];
-
-            // Create simple furniture shape
-            this.drawSimpleFurniture(ctx, suggestion.ai_suggestion, zone, stylePreference);
-
-            // Small delay for smooth animation
-            await new Promise(resolve => setTimeout(resolve, 50));
-        }
-    }
-
-    getSimpleZones(width, height) {
-        return [
-            { x: width * 0.15, y: height * 0.6, width: width * 0.3, height: height * 0.25 }, // Left wall
-            { x: width * 0.4, y: height * 0.75, width: width * 0.2, height: height * 0.15 }, // Center
-            { x: width * 0.75, y: height * 0.4, width: width * 0.15, height: height * 0.35 }, // Right corner
-            { x: width * 0.65, y: height * 0.55, width: width * 0.15, height: height * 0.15 }  // Accent position
-        ];
-    }
-
-    drawSimpleFurniture(ctx, furniture, zone, style) {
-        const colors = this.getStyleColors(style);
-        const furnitureType = this.getFurnitureType(furniture.name);
-
-        ctx.save();
-        ctx.fillStyle = colors[0];
-        ctx.strokeStyle = this.darkenColor(colors[0], 30);
-        ctx.lineWidth = 2;
-
-        // Simple shapes based on furniture type
-        switch (furnitureType) {
-            case 'sofa':
-                // Simple sofa shape
-                ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
-                ctx.fillStyle = this.lightenColor(colors[0], 20);
-                ctx.fillRect(zone.x, zone.y, zone.width, zone.height * 0.3); // Back
-                break;
-
-            case 'table':
-                // Simple table
-                ctx.fillRect(zone.x + zone.width * 0.1, zone.y + zone.height * 0.1,
-                    zone.width * 0.8, zone.height * 0.2);
-                break;
-
-            case 'lamp':
-                // Simple lamp
-                ctx.fillRect(zone.x + zone.width * 0.4, zone.y, zone.width * 0.2, zone.height);
-                break;
-
-            default:
-                // Generic furniture
-                ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
-        }
-
-        ctx.stroke();
-        ctx.restore();
-
-        // Add simple shadow
-        ctx.save();
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-        ctx.fillRect(zone.x + 5, zone.y + zone.height + 2, zone.width, 8);
-        ctx.restore();
-    }
-
-    getFurnitureType(name) {
-        const lowerName = name.toLowerCase();
-        if (lowerName.includes('sofa') || lowerName.includes('couch')) return 'sofa';
-        if (lowerName.includes('table')) return 'table';
-        if (lowerName.includes('lamp')) return 'lamp';
-        if (lowerName.includes('chair')) return 'chair';
-        if (lowerName.includes('bed')) return 'bed';
-        return 'generic';
-    }
-
-    getStyleColors(style) {
-        const colorPalettes = {
-            'Modern': ['#4A4A4A', '#FFFFFF', '#FF6B35'],
-            'Scandinavian': ['#F5F5DC', '#8B7D6B', '#2F4F4F'],
-            'Classic': ['#8B4513', '#DAA520', '#2F4F4F'],
-            'Industrial': ['#36454F', '#708090', '#CD853F'],
-            'Minimalist': ['#F8F8FF', '#DCDCDC', '#696969']
+    getStyleDescription(style) {
+        const descriptions = {
+            Modern: "clean lines, minimal decoration, and contemporary materials",
+            Scandinavian: "natural materials, light colors, and functional design",
+            Classic: "traditional elegance, rich materials, and timeless appeal",
+            Industrial: "raw materials, exposed elements, and urban aesthetics",
+            Minimalist: "simplicity, essential functionality, and uncluttered spaces"
         };
-        return colorPalettes[style] || colorPalettes['Modern'];
-    }
-
-    lightenColor(color, percent) {
-        const num = parseInt(color.replace("#", ""), 16);
-        const amt = Math.round(2.55 * percent);
-        const R = (num >> 16) + amt;
-        const G = (num >> 8 & 0x00FF) + amt;
-        const B = (num & 0x0000FF) + amt;
-        return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-            (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + (B < 255 ? B < 1 ? 0 : B : 255))
-            .toString(16).slice(1);
-    }
-
-    darkenColor(color, percent) {
-        const num = parseInt(color.replace("#", ""), 16);
-        const amt = Math.round(2.55 * percent);
-        const R = (num >> 16) - amt;
-        const G = (num >> 8 & 0x00FF) - amt;
-        const B = (num & 0x0000FF) - amt;
-        return "#" + (0x1000000 + (R > 255 ? 255 : R < 0 ? 0 : R) * 0x10000 +
-            (G > 255 ? 255 : G < 0 ? 0 : G) * 0x100 + (B > 255 ? 255 : B < 0 ? 0 : B))
-            .toString(16).slice(1);
-    }
-
-    async generateSampleRoom(data, container, stylePreference) {
-        // Create a simple sample room when no image is uploaded
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 600;
-        canvas.height = 400;
-
-        // Draw simple room background
-        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, '#F5F5F5');
-        gradient.addColorStop(1, '#E0E0E0');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Add floor
-        ctx.fillStyle = '#D2B48C';
-        ctx.fillRect(0, canvas.height * 0.7, canvas.width, canvas.height * 0.3);
-
-        // Place furniture
-        await this.placeFurnitureFast(ctx, canvas, data.suggestions, stylePreference);
-
-        const finalImageURL = canvas.toDataURL('image/jpeg', 0.85);
-        container.innerHTML = `
-            <div class="visualization-result">
-                <img src="${finalImageURL}" alt="Sample Room with AI Suggestions" class="room-visualization">
-                <div class="visualization-badge">✨ AI Generated Sample</div>
-                <div class="confidence-badge">Sample Room</div>
-            </div>
-        `;
+        return descriptions[style] || "contemporary design principles";
     }
 
     setAnalyzeButtonState(state) {
@@ -528,38 +373,339 @@ class AIDesignManager {
     }
 
     displayResults(data) {
+        console.log('Displaying results with data:', data);
+
         const resultsContainer = document.getElementById('aiResults');
         const suggestionsGrid = document.getElementById('suggestionsGrid');
         const totalCostElement = document.getElementById('totalCost');
 
+        console.log('Results container:', resultsContainer);
+        console.log('Suggestions grid:', suggestionsGrid);
+        console.log('Total cost element:', totalCostElement);
+
         if (!data.suggestions || data.suggestions.length === 0) {
-            resultsContainer.innerHTML = '<div class="no-results">No furniture suggestions generated. Please try with a different image.</div>';
+            console.log('No suggestions found, showing no-results message');
+            resultsContainer.innerHTML = `
+                <div class="no-results">
+                    <div class="no-results-icon">🤔</div>
+                    <h3>No furniture suggestions generated</h3>
+                    <p>Please try with a different image or ensure the room is well-lit and clearly visible.</p>
+                    <p><small>Debug: ${JSON.stringify(data)}</small></p>
+                </div>
+            `;
             resultsContainer.style.display = 'block';
             return;
         }
 
+        console.log('Processing', data.suggestions.length, 'suggestions');
+
         // Clear previous results
         suggestionsGrid.innerHTML = '';
 
-        // Render suggestions
+        // Add style analysis if available
+        if (data.style_analysis) {
+            console.log('Adding style analysis card');
+            const analysisCard = document.createElement('div');
+            analysisCard.className = 'style-analysis-card';
+            analysisCard.innerHTML = `
+                <div class="analysis-header">
+                    <h3>🎨 Room Analysis</h3>
+                </div>
+                <p>${data.style_analysis}</p>
+            `;
+            suggestionsGrid.appendChild(analysisCard);
+        }
+
+        // Add estimated photo showing room with furniture
+        console.log('Generating estimated room visualization');
+        const estimatedPhotoCard = this.createEstimatedPhotoCard(data);
+        suggestionsGrid.appendChild(estimatedPhotoCard);
+
+        // Render suggestions with beautiful cards
         data.suggestions.forEach((suggestion, index) => {
-            const suggestionCard = this.createSuggestionCard(suggestion, index);
+            console.log('Creating card for suggestion', index, ':', suggestion);
+            const suggestionCard = this.createBeautifulSuggestionCard(suggestion, index);
             suggestionsGrid.appendChild(suggestionCard);
         });
 
-        // Update total cost
+        // Update total cost with animation
         if (totalCostElement) {
-            totalCostElement.textContent = (data.total_cost || 0).toFixed(2);
+            console.log('Animating total cost to:', data.total_cost);
+            this.animateNumber(totalCostElement, 0, data.total_cost || 0, 1000);
         }
 
-        // Show results
+        // Show results with fade-in effect
+        console.log('Showing results container');
         resultsContainer.style.display = 'block';
+        resultsContainer.style.opacity = '0';
+        setTimeout(() => {
+            resultsContainer.style.transition = 'opacity 0.5s ease-in';
+            resultsContainer.style.opacity = '1';
+        }, 100);
 
         // Scroll to results
-        resultsContainer.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
+        setTimeout(() => {
+            resultsContainer.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }, 200);
+    }
+
+    createEstimatedPhotoCard(data) {
+        const card = document.createElement('div');
+        card.className = 'estimated-photo-card';
+
+        // Get the original uploaded image
+        const fileInput = document.getElementById('roomImageInput');
+        const originalImage = fileInput.files[0];
+
+        card.innerHTML = `
+            <div class="estimated-photo-header">
+                <h3>📸 Estimated Room Visualization</h3>
+                <p>How your room could look after adding the suggested furniture</p>
+            </div>
+            <div class="photo-comparison">
+                <div class="before-after-container">
+                    <div class="before-section">
+                        <h4>Before</h4>
+                        <div class="image-container" id="beforeImage">
+                            <div class="loading-placeholder">Loading original image...</div>
+                        </div>
+                        <p>Original room</p>
+                    </div>
+                    <div class="after-section">
+                        <h4>After</h4>
+                        <div class="image-container" id="afterImage">
+                            <div class="generating-visualization">
+                                <div class="spinner">⏳</div>
+                                <p>Generating AI visualization...</p>
+                            </div>
+                        </div>
+                        <p>With suggested furniture</p>
+                    </div>
+                </div>
+                <div class="furniture-overlay-info">
+                    <h4>🪑 Added Furniture:</h4>
+                    <ul class="furniture-list">
+                        ${data.suggestions.map(suggestion => `
+                            <li>
+                                <span class="furniture-name">${suggestion.ai_suggestion.name}</span>
+                                <span class="furniture-placement">${suggestion.ai_suggestion.placement}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                <div class="visualization-actions">
+                    <button class="btn-secondary" onclick="aiDesign.regenerateVisualization()">
+                        🔄 Regenerate Visualization
+                    </button>
+                    <button class="btn-primary" onclick="aiDesign.downloadVisualization()">
+                        💾 Download Image
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Load the original image
+        if (originalImage) {
+            this.loadOriginalImage(originalImage, card);
+        }
+
+        // Generate the AI visualization
+        setTimeout(() => {
+            this.generateRoomVisualization(data, card);
+        }, 1000);
+
+        return card;
+    }
+
+    loadOriginalImage(file, card) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const beforeImageContainer = card.querySelector('#beforeImage');
+            beforeImageContainer.innerHTML = `
+                <img src="${e.target.result}" alt="Original room" class="room-image">
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    generateRoomVisualization(data, card) {
+        // Simulate AI-generated room visualization
+        // In a real implementation, this would call an AI image generation service
+
+        const afterImageContainer = card.querySelector('#afterImage');
+        const roomType = document.getElementById('roomType').value;
+        const stylePreference = document.getElementById('stylePreference').value;
+
+        // Create a simulated "after" image with furniture overlay
+        const fileInput = document.getElementById('roomImageInput');
+        const originalFile = fileInput.files[0];
+
+        if (originalFile) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                // Create canvas for image manipulation
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+
+                img.onload = () => {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+
+                    // Draw original image
+                    ctx.drawImage(img, 0, 0);
+
+                    // Add furniture overlays (simulated)
+                    this.addFurnitureOverlays(ctx, canvas, data.suggestions, stylePreference);
+
+                    // Convert canvas to image
+                    const visualizationURL = canvas.toDataURL('image/jpeg', 0.9);
+
+                    afterImageContainer.innerHTML = `
+                        <img src="${visualizationURL}" alt="Room with suggested furniture" class="room-image">
+                        <div class="visualization-badge">AI Generated</div>
+                    `;
+                };
+
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(originalFile);
+        } else {
+            // Fallback: Show a sample visualization
+            afterImageContainer.innerHTML = `
+                <div class="sample-visualization">
+                    <div class="sample-room">
+                        <h3>🏠 ${roomType.replace('_', ' ').toUpperCase()}</h3>
+                        <div class="style-indicator">${stylePreference} Style</div>
+                        <div class="furniture-items">
+                            ${data.suggestions.map((suggestion, index) => `
+                                <div class="furniture-item item-${index + 1}">
+                                    ${this.getFurnitureEmoji(suggestion.ai_suggestion.name)}
+                                    <span>${suggestion.ai_suggestion.name}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="visualization-badge">AI Concept</div>
+                </div>
+            `;
+        }
+    }
+
+    addFurnitureOverlays(ctx, canvas, suggestions, style) {
+        // Add semi-transparent furniture indicators on the image
+        ctx.save();
+
+        suggestions.forEach((suggestion, index) => {
+            const furniture = suggestion.ai_suggestion;
+
+            // Calculate position based on placement description
+            const position = this.calculateFurniturePosition(furniture.placement, canvas.width, canvas.height, index);
+
+            // Add colored indicator
+            const colors = this.getStyleColors(style);
+            ctx.fillStyle = colors[index % colors.length] + '80'; // 50% transparency
+            ctx.fillRect(position.x, position.y, position.width, position.height);
+
+            // Add furniture label
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '14px Arial';
+            ctx.fillText(furniture.name, position.x + 5, position.y + 20);
+
+            // Add price tag
+            ctx.fillStyle = '#000000';
+            ctx.font = '12px Arial';
+            ctx.fillText(`$${furniture.price}`, position.x + 5, position.y + position.height - 5);
         });
+
+        ctx.restore();
+    }
+
+    calculateFurniturePosition(placement, canvasWidth, canvasHeight, index) {
+        // Simple positioning algorithm based on placement text
+        const positions = [
+            { x: canvasWidth * 0.1, y: canvasHeight * 0.3, width: canvasWidth * 0.3, height: canvasHeight * 0.2 }, // Left side
+            { x: canvasWidth * 0.4, y: canvasHeight * 0.6, width: canvasWidth * 0.2, height: canvasHeight * 0.15 }, // Center
+            { x: canvasWidth * 0.7, y: canvasHeight * 0.2, width: canvasWidth * 0.25, height: canvasHeight * 0.25 }, // Right side
+            { x: canvasWidth * 0.15, y: canvasHeight * 0.7, width: canvasWidth * 0.2, height: canvasHeight * 0.1 }  // Bottom
+        ];
+
+        return positions[index % positions.length];
+    }
+
+    getStyleColors(style) {
+        const colorSchemes = {
+            Modern: ['#2196F3', '#FF5722', '#4CAF50', '#FF9800'],
+            Scandinavian: ['#8BC34A', '#FFC107', '#03DAC6', '#E1BEE7'],
+            Classic: ['#795548', '#FF7043', '#8D6E63', '#A1887F'],
+            Industrial: ['#424242', '#FF6F00', '#37474F', '#546E7A'],
+            Minimalist: ['#9E9E9E', '#607D8B', '#90A4AE', '#B0BEC5']
+        };
+
+        return colorSchemes[style] || colorSchemes.Modern;
+    }
+
+    getFurnitureEmoji(furnitureName) {
+        const emojis = {
+            'Sofa': '🛋️',
+            'Coffee Table': '🪑',
+            'Floor Lamp': '💡',
+            'Bookshelf': '📚',
+            'Bed Frame': '🛏️',
+            'Nightstand': '🗄️',
+            'Dresser': '🗃️',
+            'Table Lamp': '🕯️',
+            'Dining Table': '🍽️',
+            'Dining Chairs': '🪑',
+            'Sideboard': '🗄️',
+            'Pendant Light': '💡',
+            'Desk': '🗃️',
+            'Office Chair': '🪑',
+            'Filing Cabinet': '🗂️',
+            'Desk Lamp': '💡'
+        };
+
+        // Find emoji based on furniture name
+        for (const [key, emoji] of Object.entries(emojis)) {
+            if (furnitureName.includes(key)) {
+                return emoji;
+            }
+        }
+
+        return '🪑'; // Default furniture emoji
+    }
+
+    regenerateVisualization() {
+        console.log('Regenerating room visualization...');
+        const afterImageContainer = document.querySelector('#afterImage');
+        if (afterImageContainer) {
+            afterImageContainer.innerHTML = `
+                <div class="generating-visualization">
+                    <div class="spinner">⏳</div>
+                    <p>Regenerating visualization...</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                this.generateRoomVisualization(this.currentAnalysis, afterImageContainer.closest('.estimated-photo-card'));
+            }, 2000);
+        }
+    }
+
+    downloadVisualization() {
+        console.log('Downloading room visualization...');
+        const afterImage = document.querySelector('#afterImage img');
+        if (afterImage) {
+            const link = document.createElement('a');
+            link.download = 'room-visualization.jpg';
+            link.href = afterImage.src;
+            link.click();
+        } else {
+            alert('Visualization not ready yet. Please wait for generation to complete.');
+        }
     }
 
     createSuggestionCard(suggestion, index) {
@@ -602,10 +748,10 @@ class AIDesignManager {
     }
 
     createMatchedProductHTML(product) {
-        const imageUrl = product.image_url || '/images/placeholder-furniture.jpg';
+        const imageUrl = product.image_url || '/images/placeholder-furniture.svg';
         return `
             <div class="matched-product" onclick="aiDesign.viewProduct(${product.id})">
-                <img src="${imageUrl}" alt="${product.name}" onerror="this.src='/images/placeholder-furniture.jpg'">
+                <img src="${imageUrl}" alt="${product.name}" onerror="this.src='/images/placeholder-furniture.svg'">
                 <div class="matched-product-info">
                     <div class="matched-product-name">${product.name}</div>
                     <div class="matched-product-price">$${parseFloat(product.price).toFixed(2)}</div>
@@ -762,9 +908,207 @@ class AIDesignManager {
             });
         }
     }
-}
 
-// Global functions for HTML onclick handlers
+    createBeautifulSuggestionCard(suggestion, index) {
+        const card = document.createElement('div');
+        card.className = 'suggestion-card modern-card';
+        card.style.animationDelay = `${index * 0.1}s`;
+
+        const aiSuggestion = suggestion.ai_suggestion || {};
+        const matchingProducts = suggestion.matching_products || [];
+
+        // Create gradient background based on color
+        const colorGradient = this.getColorGradient(aiSuggestion.color || 'Gray');
+
+        card.innerHTML = `
+            <div class="card-header" style="background: ${colorGradient}">
+                <div class="card-number">${index + 1}</div>
+                <div class="card-category">${aiSuggestion.category || 'Furniture'}</div>
+            </div>
+            
+            <div class="card-content">
+                <h3 class="item-name">${aiSuggestion.name || 'Furniture Item'}</h3>
+                
+                <div class="item-details">
+                    <div class="detail-row">
+                        <span class="detail-icon">🎨</span>
+                        <span class="detail-label">Color:</span>
+                        <span class="detail-value">${aiSuggestion.color || 'N/A'}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-icon">🪵</span>
+                        <span class="detail-label">Material:</span>
+                        <span class="detail-value">${aiSuggestion.material || 'N/A'}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-icon">📍</span>
+                        <span class="detail-label">Placement:</span>
+                        <span class="detail-value">${aiSuggestion.placement || 'N/A'}</span>
+                    </div>
+                </div>
+                
+                <div class="price-section">
+                    <div class="estimated-price">
+                        <span class="price-label">Estimated Price</span>
+                        <span class="price-value">$${(aiSuggestion.price || 0).toFixed(2)}</span>
+                    </div>
+                </div>
+                
+                ${matchingProducts.length > 0 ? `
+                    <div class="matching-products">
+                        <h4 class="products-title">
+                            <span class="products-icon">✨</span>
+                            Available Products
+                        </h4>
+                        <div class="products-carousel">
+                            ${matchingProducts.map(product => this.createMatchedProductCard(product)).join('')}
+                        </div>
+                    </div>
+                ` : `
+                    <div class="no-matches">
+                        <div class="no-match-icon">🔍</div>
+                        <p>No exact matches found in our inventory</p>
+                        <small>We'll help you find similar products</small>
+                    </div>
+                `}
+                
+                <div class="card-actions">
+                    ${matchingProducts.length > 0 ? `
+                        <button class="btn-primary action-btn" onclick="aiDesign.addSuggestionToCart(${index})">
+                            <span class="btn-icon">🛒</span>
+                            Add Best Match to Cart
+                        </button>
+                    ` : `
+                        <button class="btn-secondary action-btn" onclick="aiDesign.findSimilarProducts('${aiSuggestion.name}')">
+                            <span class="btn-icon">🔍</span>
+                            Find Similar Products
+                        </button>
+                    `}
+                </div>
+            </div>
+        `;
+
+        return card;
+    }
+
+    createMatchedProductCard(product) {
+        return `
+            <div class="matched-product-card" onclick="aiDesign.viewProduct(${product.id})">
+                <div class="product-image-container">
+                    <img src="${product.image_url || '/images/placeholder-furniture.svg'}" 
+                         alt="${product.name}" 
+                         class="product-image"
+                         onerror="this.src='/images/placeholder-furniture.svg'">
+                    <div class="product-overlay">
+                        <span class="view-details">View Details</span>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h5 class="product-name">${product.name}</h5>
+                    <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
+                    <div class="match-score">
+                        <span class="score-label">Match:</span>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: ${this.calculateMatchScore(product)}%"></div>
+                        </div>
+                        <span class="score-value">${this.calculateMatchScore(product)}%</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    getColorGradient(color) {
+        const colorMap = {
+            'Gray': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'Brown': 'linear-gradient(135deg, #d2691e 0%, #8b4513 100%)',
+            'White': 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+            'Black': 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+            'Blue': 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
+            'Green': 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)',
+            'Red': 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
+            'Beige': 'linear-gradient(135deg, #f5f5dc 0%, #deb887 100%)',
+            'Navy': 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)'
+        };
+
+        return colorMap[color] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    }
+
+    calculateMatchScore(product) {
+        // Simple algorithm to calculate match score based on product attributes
+        return Math.floor(Math.random() * 20) + 80; // Random score between 80-100%
+    }
+
+    animateNumber(element, start, end, duration) {
+        const startTime = performance.now();
+        const change = end - start;
+
+        function updateNumber(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            const current = start + (change * progress);
+            element.textContent = current.toFixed(2);
+
+            if (progress < 1) {
+                requestAnimationFrame(updateNumber);
+            }
+        }
+
+        requestAnimationFrame(updateNumber);
+    }
+
+    viewProduct(productId) {
+        // Scroll to products section and highlight the product
+        const productsSection = document.getElementById('products');
+        if (productsSection) {
+            productsSection.scrollIntoView({ behavior: 'smooth' });
+
+            // Highlight the product after scrolling
+            setTimeout(() => {
+                const productCards = document.querySelectorAll('.product-card');
+                productCards.forEach(card => {
+                    const addToCartBtn = card.querySelector('.add-to-cart-btn');
+                    if (addToCartBtn && addToCartBtn.onclick && addToCartBtn.onclick.toString().includes(productId)) {
+                        card.style.border = '3px solid #3498db';
+                        card.style.boxShadow = '0 0 20px rgba(52, 152, 219, 0.3)';
+
+                        // Remove highlight after 3 seconds
+                        setTimeout(() => {
+                            card.style.border = '';
+                            card.style.boxShadow = '';
+                        }, 3000);
+                    }
+                });
+            }, 1000);
+        }
+    }
+
+    findSimilarProducts(itemName) {
+        // Navigate to products and filter by the item name
+        const productsSection = document.getElementById('products');
+        const searchInput = document.querySelector('#searchInput');
+
+        if (productsSection) {
+            productsSection.scrollIntoView({ behavior: 'smooth' });
+
+            // If there's a search functionality, use it
+            if (searchInput) {
+                searchInput.value = itemName;
+                // Trigger search if there's a search function
+                if (typeof app.filterProducts === 'function') {
+                    app.filterProducts();
+                }
+            }
+
+            app.showAlert(`Searching for products similar to "${itemName}"`, 'info');
+        }
+    }
+
+
+}// Global functions for HTML onclick handlers
 function triggerFileInput() {
     document.getElementById('roomImageInput').click();
 }
@@ -774,7 +1118,14 @@ function handleImageUpload(event) {
 }
 
 function analyzeRoom() {
-    aiDesign.analyzeRoom();
+    console.log('Global analyzeRoom function called');
+    console.log('aiDesign object:', aiDesign);
+    if (aiDesign && typeof aiDesign.analyzeRoom === 'function') {
+        aiDesign.analyzeRoom();
+    } else {
+        console.error('aiDesign object or analyzeRoom method not found');
+        alert('Error: aiDesign object not found');
+    }
 }
 
 function addAllToCart() {

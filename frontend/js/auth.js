@@ -1,7 +1,7 @@
 // Authentication module
 class AuthManager {
     constructor() {
-        this.API_BASE = 'http://localhost/backend/api';
+        this.API_BASE = 'http://localhost:8000/backend/api';
         this.setupFormHandlers();
     }
 

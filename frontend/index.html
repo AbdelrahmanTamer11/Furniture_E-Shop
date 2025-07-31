@@ -7,12 +7,6 @@
     <title>FurniVision - AI-Enhanced Furniture Store</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/components.css">
-    <script>
-        console.log('HTML loaded');
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('DOM Content Loaded');
-        });
-    </script>
 </head>
 
 <body>
@@ -26,8 +20,8 @@
                 <li><a href="#home" class="nav-link">Home</a></li>
                 <li><a href="#products" class="nav-link">Products</a></li>
                 <li><a href="#ai-design" class="nav-link">AI Design</a></li>
-                <li><a href="#about" class="nav-link">About</a></li>
-                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li><a href="#about" class="nav-link" onclick="scrollToAbout()">About</a></li>
+                <li><a href="#contact" class="nav-link" onclick="scrollToContact()">Contact</a></li>
             </ul>
             <div class="nav-actions">
                 <button class="cart-btn" onclick="toggleCart()">
@@ -56,7 +50,8 @@
             </div>
         </div>
         <div class="hero-image">
-            <img src="images/hero-furniture.jpg" alt="Modern furniture setup" id="heroImage">
+            <img src="https://www.huset.com.au/blog/wp-content/uploads/2023/10/2.png" alt="Modern furniture setup"
+                id="heroImage">
         </div>
     </section>
 
@@ -117,12 +112,12 @@
             </div>
 
             <!-- Product Grid -->
-            <div class="products-grid" id="productsGrid">
-                <!-- Products will be loaded here -->
+            <div class="products-by-category" id="productsByCategory">
+                <!-- Products will be loaded here by category -->
             </div>
 
             <!-- Load More Button -->
-            <div class="load-more">
+            <div class="load-more" style="display: none;">
                 <button class="btn-secondary" id="loadMoreBtn" onclick="loadMoreProducts()">Load More</button>
             </div>
         </div>
@@ -131,19 +126,18 @@
     <!-- AI Design Section -->
     <section id="ai-design" class="ai-design-section">
         <div class="container">
-            <h2>AI Room Design Assistant</h2>
+            <h2>AI Room Design Assistant 🤖</h2>
             <p>Upload a photo of your room and let our AI create the perfect furniture arrangement for you.</p>
 
             <div class="ai-upload-area">
-                <div class="upload-zone" id="uploadZone" onclick="triggerFileInput()">
+                <div class="upload-zone" id="uploadZone">
                     <div class="upload-content">
                         <div class="upload-icon">📸</div>
                         <h3>Upload Your Room Photo</h3>
                         <p>Drag and drop or click to select an image</p>
                         <small>Supports JPG, PNG, WebP (max 5MB)</small>
                     </div>
-                    <input type="file" id="roomImageInput" accept="image/*" style="display: none;"
-                        onchange="handleImageUpload(event)">
+                    <input type="file" id="roomImageInput" accept="image/*" style="display: none;">
                 </div>
 
                 <div class="ai-options">
@@ -169,13 +163,11 @@
                     </div>
                 </div>
 
-                <button class="btn-primary" id="analyzeBtn" onclick="analyzeRoom()" disabled>
+                <button class="btn-primary" id="analyzeBtn" onclick="analyzeRoom()">
                     <span class="btn-text">Analyze Room</span>
                     <span class="loading-spinner" style="display: none;">⏳</span>
                 </button>
-            </div>
-
-            <!-- AI Results -->
+            </div> <!-- AI Results -->
             <div class="ai-results" id="aiResults" style="display: none;">
                 <h3>AI Furniture Suggestions</h3>
                 <div class="suggestions-grid" id="suggestionsGrid">
@@ -269,7 +261,7 @@
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
+                <div class="footer-section" id="about">
                     <h3>FurniVision</h3>
                     <p>Transforming spaces with AI-powered furniture design.</p>
                 </div>
@@ -282,10 +274,10 @@
                         <li><a href="#about">About</a></li>
                     </ul>
                 </div>
-                <div class="footer-section">
+                <div class="footer-section" id="contact">
                     <h4>Contact</h4>
-                    <p>Email: support@furnivision.com</p>
-                    <p>Phone: (555) 123-4567</p>
+                    <p>Email: abdelrahman_tamer@furnivision.com</p>
+                    <p>Phone: 01003234615 </p>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -299,80 +291,6 @@
     <script src="js/cart.js"></script>
     <script src="js/products.js"></script>
     <script src="js/ai-design.js"></script>
-
-    <script>
-        // Global functions for HTML onclick handlers
-        function openAIDesign() {
-            document.getElementById('ai-design').scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
-
-        function scrollToProducts() {
-            document.getElementById('products').scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
-
-        function filterProducts() {
-            if (typeof app !== 'undefined' && app.filterProducts) {
-                app.filterProducts();
-            }
-        }
-
-        function loadMoreProducts() {
-            if (typeof app !== 'undefined' && app.loadMoreProducts) {
-                app.loadMoreProducts();
-            }
-        }
-
-        function toggleCart() {
-            if (typeof app !== 'undefined' && app.toggleCart) {
-                app.toggleCart();
-            }
-        }
-
-        function toggleAuth() {
-            if (typeof app !== 'undefined' && app.toggleAuth) {
-                app.toggleAuth();
-            }
-        }
-
-        function checkout() {
-            if (typeof app !== 'undefined' && app.checkout) {
-                app.checkout();
-            }
-        }
-
-        function switchToRegister() {
-            if (typeof switchToRegister !== 'undefined') {
-                switchToRegister();
-            }
-        }
-
-        function switchToLogin() {
-            if (typeof switchToLogin !== 'undefined') {
-                switchToLogin();
-            }
-        }
-
-        // Wait for all scripts to load before initializing
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('All scripts loaded, initializing...');
-
-            // Ensure smooth scrolling works for navigation
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href').substring(1);
-                    const targetElement = document.getElementById(targetId);
-                    if (targetElement) {
-                        targetElement.scrollIntoView({ behavior: 'smooth' });
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 
 </html>
