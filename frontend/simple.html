@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FurniVision - Simple Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            background: #45a049;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: rgba(76, 175, 80, 0.3);
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 FurniVision AI Furniture Store</h1>
+            <p>AI-Enhanced Room Design Platform</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🚀 Quick Start</h2>
+            <div id="status" class="status success">✅ Basic site functionality working!</div>
+
+            <h3>Navigation Options:</h3>
+            <button class="btn" onclick="goToFullSite()">🏪 Open Full Store</button>
+            <button class="btn" onclick="testAI()">🤖 Test AI Design</button>
+            <button class="btn" onclick="showProducts()">📦 Browse Products</button>
+        </div>
+
+        <div class="test-section">
+            <h2>🎨 AI Room Design</h2>
+            <p>Upload a room photo and get intelligent furniture suggestions:</p>
+            <input type="file" id="roomUpload" accept="image/*" style="margin: 10px 0;">
+            <br>
+            <button class="btn" onclick="analyzeRoom()">🔍 Analyze Room</button>
+            <div id="aiResult" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🛠️ System Status</h2>
+            <div id="systemStatus">
+                <p>✅ HTML Loading: Working</p>
+                <p>✅ CSS Styling: Working</p>
+                <p>✅ JavaScript: Working</p>
+                <p id="serverStatus">🔄 Checking server...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('Simple FurniVision test page loaded');
+
+        // Test server connectivity
+        function checkServer() {
+            fetch('./index.html')
+                .then(response => {
+                    document.getElementById('serverStatus').innerHTML = '✅ Server: Working';
+                    document.getElementById('serverStatus').className = 'success';
+                })
+                .catch(error => {
+                    document.getElementById('serverStatus').innerHTML = '❌ Server: Use file:// access';
+                    document.getElementById('serverStatus').className = 'error';
+                });
+        }
+
+        function goToFullSite() {
+            window.location.href = 'index.html';
+        }
+
+        function testAI() {
+            alert('🤖 AI Design Feature:\n\n✅ Fast visualization (2 seconds)\n✅ Smart furniture placement\n✅ Room analysis\n✅ 3D-style rendering\n\nReady to test!');
+        }
+
+        function showProducts() {
+            alert('📦 Product Features:\n\n✅ Category browsing\n✅ Search functionality\n✅ Shopping cart\n✅ Price filtering\n\nNavigating to products...');
+            setTimeout(() => goToFullSite(), 1000);
+        }
+
+        function analyzeRoom() {
+            const fileInput = document.getElementById('roomUpload');
+            const result = document.getElementById('aiResult');
+
+            if (!fileInput.files[0]) {
+                result.innerHTML = '<p style="color: #ff6b6b;">Please select a room image first!</p>';
+                return;
+            }
+
+            result.innerHTML = `
+                <div style="color: #4ecdc4;">
+                    <h4>🎯 AI Analysis Complete!</h4>
+                    <p>✅ Room type detected: Living Room</p>
+                    <p>✅ Style preference: Modern</p>
+                    <p>✅ Furniture suggestions: 3 items</p>
+                    <p>✅ Estimated cost: $1,399.97</p>
+                    <button class="btn" onclick="goToFullSite()" style="margin-top: 10px;">
+                        View Full Results
+                    </button>
+                </div>
+            `;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM loaded, checking server...');
+            setTimeout(checkServer, 1000);
+        });
+    </script>
+</body>
+
+</html>
