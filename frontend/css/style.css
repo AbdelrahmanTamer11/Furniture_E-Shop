@@ -1190,52 +1190,174 @@ body {
     text-decoration: underline;
 }
 
-/* Specific styling for forgot password link */
-.forgot-password {
-    text-align: center;
-    margin: 1rem 0;
+/* User Dropdown Styles */
+.user-dropdown {
+    position: relative;
+    display: inline-block;
 }
 
-.forgot-password a {
-    color: #3498db;
-    text-decoration: none;
-    font-size: 0.9rem;
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
     font-weight: 500;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
 }
 
-.forgot-password a:hover {
-    color: #2980b9;
-    text-decoration: underline;
+.user-info:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
 }
 
-/* Ensure proper spacing between login button and links */
-.auth-btn {
-    margin-bottom: 1rem;
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+    color: white;
 }
 
-/* Utility Classes */
-.text-center {
+.user-info i {
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.user-dropdown.active .user-info i {
+    transform: rotate(180deg);
+}
+
+.user-dropdown-content {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e0e0e0;
+    min-width: 240px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.95);
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.user-dropdown.active .user-dropdown-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.user-dropdown-header {
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8f9ff, #ffffff);
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.user-dropdown-header .user-name {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.user-dropdown-header .user-email {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.user-dropdown-menu {
+    padding: 0.5rem 0;
+}
+
+.user-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: #555;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.9rem;
+    border-radius: 0;
+}
+
+.user-dropdown-item:hover {
+    background: #f8f9fa;
+    color: #2c3e50;
+    padding-left: 1.25rem;
+}
+
+.user-dropdown-item i {
+    width: 16px;
     text-align: center;
+    color: #3498db;
+    font-size: 0.9rem;
 }
 
-.hidden {
-    display: none;
-}
-
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.error {
+.user-dropdown-item.logout {
     color: #e74c3c;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 0.25rem;
 }
 
-.success {
-    color: #27ae60;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
+.user-dropdown-item.logout:hover {
+    background: #fdf2f2;
+    color: #c0392b;
+}
+
+.user-dropdown-item.logout i {
+    color: #e74c3c;
+}
+
+/* Arrow for dropdown */
+.user-dropdown-content::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 20px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid white;
+    filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .user-dropdown-content {
+        right: -10px;
+        min-width: 220px;
+    }
+
+    .user-info {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+    }
 }

@@ -60,6 +60,14 @@ class AuthManager {
                 this.clearForm('loginForm');
                 toggleAuth();
                 app.showAlert('Login successful!', 'success');
+
+                // Store user data
+                localStorage.setItem('user', JSON.stringify(data.user));
+
+                // Display user info
+                displayUserInfo(data.user);
+
+                console.log('Login successful');
             } else {
                 this.showError(data.error || 'Login failed');
             }
@@ -406,6 +414,18 @@ const authManager = new AuthManager();
 document.addEventListener('DOMContentLoaded', () => {
     enhanceAuthModal();
     authManager.addPasswordStrengthIndicator();
+
+    // Check for existing user on page load
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+        try {
+            const user = JSON.parse(storedUser);
+            displayUserInfo(user);
+        } catch (error) {
+            console.error('Error parsing stored user data:', error);
+            localStorage.removeItem('user');
+        }
+    }
 });
 
 // Real-time form validation
@@ -571,4 +591,101 @@ function showRegisterForm() {
             </div>
         </div>
     `;
+}
+
+// Update the displayUserInfo function
+function displayUserInfo(user) {
+    const authBtn = document.getElementById('authBtn');
+    if (authBtn) {
+        // Get user initials for avatar
+        const initials = user.first_name.charAt(0).toUpperCase() + user.last_name.charAt(0).toUpperCase();
+
+        // Replace the login button with user dropdown
+        authBtn.outerHTML = `
+            <div class="user-dropdown">
+                <button class="user-info" onclick="toggleUserDropdown()">
+                    <div class="user-avatar">${initials}</div>
+                    <span>Hi, ${user.first_name}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="user-dropdown-content" id="userDropdownContent">
+                    <div class="user-dropdown-header">
+                        <div class="user-name">${user.first_name} ${user.last_name}</div>
+                        <div class="user-email">${user.email}</div>
+                    </div>
+                    <div class="user-dropdown-menu">
+                        <a href="#" class="user-dropdown-item" onclick="showProfile()">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a href="#" class="user-dropdown-item" onclick="showOrders()">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Orders</span>
+                        </a>
+                        <button class="user-dropdown-item logout" onclick="handleLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Toggle user dropdown visibility
+function toggleUserDropdown() {
+    const dropdown = document.querySelector('.user-dropdown');
+    const dropdownContent = document.getElementById('userDropdownContent');
+
+    if (dropdown && dropdownContent) {
+        // Close all other dropdowns first
+        document.querySelectorAll('.user-dropdown.active').forEach(d => {
+            if (d !== dropdown) d.classList.remove('active');
+        });
+
+        // Toggle current dropdown
+        dropdown.classList.toggle('active');
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function (event) {
+    const dropdown = document.querySelector('.user-dropdown');
+    if (dropdown && !dropdown.contains(event.target)) {
+        dropdown.classList.remove('active');
+    }
+});
+
+// Menu item functions
+function showProfile() {
+    console.log('Opening profile...');
+    alert('Profile page coming soon!');
+    toggleUserDropdown();
+}
+
+function showOrders() {
+    console.log('Opening orders...');
+    alert('Orders page coming soon!');
+    toggleUserDropdown();
+}
+
+function handleLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+        // Clear user data
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
+
+        // Reset UI to login state
+        const userDropdown = document.querySelector('.user-dropdown');
+        if (userDropdown) {
+            userDropdown.outerHTML = `
+                <button class="auth-btn" id="authBtn" onclick="toggleAuth()">Login</button>
+            `;
+        }
+
+        console.log('User logged out successfully');
+        // Optionally reload the page to reset all states
+        // window.location.reload();
+    }
 }
