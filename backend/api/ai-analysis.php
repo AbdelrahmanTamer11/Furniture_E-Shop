@@ -172,7 +172,7 @@ IMPORTANT: Analyze the uploaded image of this {$roomType} and suggest furniture 
 Based on the room photo, lighting, existing elements, and the specified {$stylePreference} style, please provide:
 
 1. A brief analysis of the current room (lighting, layout, existing furniture/decor)
-2. 3-5 specific furniture recommendations that would work in THIS specific room
+2. 3-6 specific furniture recommendations that would work in THIS specific room
 3. Consider the room type: {$roomType}
 4. Match the style preference: {$stylePreference}
 

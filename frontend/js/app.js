@@ -1,11 +1,14 @@
 // Main application JavaScript
+const API_BASE = './backend/api';
+
 class FurnitureApp {
     constructor() {
-        this.API_BASE = 'http://localhost:8000/backend/api';
         this.currentUser = null;
         this.cartItems = [];
         this.products = [];
+        this.filteredProducts = [];
         this.isLoadingProducts = false; // Flag to prevent multiple simultaneous API calls
+        this.isLoading = false; // Add this to prevent multiple calls
         this.filters = {
             category: '',
             style: '',
@@ -269,31 +272,51 @@ class FurnitureApp {
     }
 
     async loadProducts() {
-        // Prevent multiple simultaneous API calls
-        if (this.isLoadingProducts) {
-            console.log('Already loading products, skipping...');
-            return;
-        }
+        if (this.isLoading) return;
+        this.isLoading = true;
 
         try {
-            this.isLoadingProducts = true;
-            console.log('Loading products from API:', `${this.API_BASE}/products.php`);
-            this.showLoading('productsByCategory');
-            const params = new URLSearchParams(this.filters);
-            const response = await fetch(`${this.API_BASE}/products.php?${params}`);
-            console.log('API Response status:', response.status);
+            console.log('Loading products from API...');
+
+            const response = await fetch('./backend/api/products.php');
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const data = await response.json();
             console.log('Products data received:', data);
 
-            this.products = data.products || [];
-            console.log('Number of products loaded:', this.products.length);
-            this.renderProductsByCategory();
+            if (data.products && Array.isArray(data.products) && data.products.length > 0) {
+                // Remove duplicates based on product name
+                const uniqueProducts = this.removeDuplicateProducts(data.products);
+                this.products = uniqueProducts;
+                this.filteredProducts = [...this.products];
+                this.renderProductsByCategory(this.products);
+            } else {
+                document.getElementById('productsByCategory').innerHTML =
+                    '<p style="text-align: center; color: #666;">No products available.</p>';
+            }
         } catch (error) {
-            console.error('Failed to load products:', error);
-            this.showAlert('Failed to load products', 'error');
+            console.error('Error loading products:', error);
+            document.getElementById('productsByCategory').innerHTML =
+                '<p style="text-align: center; color: #e74c3c;">Error loading products.</p>';
         } finally {
-            this.isLoadingProducts = false;
+            this.isLoading = false;
         }
+    }
+
+    // Add this new method to remove duplicates
+    removeDuplicateProducts(products) {
+        const seen = new Set();
+        return products.filter(product => {
+            const key = `${product.name}-${product.category_id}`;
+            if (seen.has(key)) {
+                return false; // Skip duplicate
+            }
+            seen.add(key);
+            return true; // Keep unique product
+        });
     }
 
     async loadFeaturedProducts() {
@@ -376,25 +399,34 @@ class FurnitureApp {
     }
 
     createProductCard(product) {
-        const imageUrl = product.image_url || '/images/placeholder-furniture.svg';
-        const inStock = product.stock_quantity > 0;
+        // Remove the dot from the image path
+        const imageUrl = product.image_url || '/images/products/placeholder.jpg';
 
         return `
             <div class="product-card">
-                <img src="${imageUrl}" alt="${product.name}" class="product-image" 
-                     onerror="this.src='/images/placeholder-furniture.svg'">
+                <div class="product-image">
+                    <img src="${imageUrl}" 
+                         alt="${product.name}" 
+                         loading="lazy"
+                         onerror="this.src='https://via.placeholder.com/300x200/f8f9fa/6c757d?text=${encodeURIComponent(product.name)}'">
+                </div>
                 <div class="product-info">
-                    <h3 class="product-name">${product.name}</h3>
-                    <p class="product-description">${product.description || ''}</p>
-                    <div class="product-meta">
-                        <span class="product-style">${product.style || 'N/A'}</span>
-                        <span class="product-category">${product.category_name || 'N/A'}</span>
+                    <h4>${product.name}</h4>
+                    <p class="product-description">${product.description}</p>
+                    <div class="product-details">
+                        <span class="product-style">Style: ${product.style}</span>
+                        <span class="product-color">Color: ${product.color}</span>
+                        <span class="product-material">Material: ${product.material}</span>
+                    </div>
+                    <div class="product-dimensions">
+                        <small>Dimensions: ${product.dimensions}</small>
                     </div>
                     <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
-                    <button class="add-to-cart-btn" 
-                            onclick="app.addToCart(${product.id})" 
-                            ${!inStock ? 'disabled' : ''}>
-                        ${inStock ? 'Add to Cart' : 'Out of Stock'}
+                    <div class="product-stock">
+                        <small>In Stock: ${product.stock_quantity} items</small>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="app.addToCart(${product.id})">
+                        Add to Cart
                     </button>
                 </div>
             </div>

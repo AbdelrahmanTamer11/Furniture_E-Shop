@@ -19,6 +19,33 @@ if (strpos($cleanPath, '/backend/') === 0) {
     }
 }
 
+// Handle images folder
+if (strpos($cleanPath, '/images/') === 0) {
+    $imageFile = __DIR__ . $cleanPath;
+    error_log("Image file check: " . $imageFile);
+    if (file_exists($imageFile) && !is_dir($imageFile)) {
+        error_log("Serving image: " . $imageFile);
+        
+        // Set correct MIME type for images
+        $extension = strtolower(pathinfo($imageFile, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml'
+        ];
+        
+        if (isset($mimeTypes[$extension])) {
+            header('Content-Type: ' . $mimeTypes[$extension]);
+        }
+        
+        readfile($imageFile);
+        exit;
+    }
+}
+
 // Handle static files from frontend
 $frontendFile = __DIR__ . '/frontend' . $cleanPath;
 error_log("Frontend file check: " . $frontendFile);
@@ -32,16 +59,7 @@ if ($cleanPath !== '/' && file_exists($frontendFile) && !is_dir($frontendFile)) 
         'css' => 'text/css',
         'js' => 'application/javascript',
         'html' => 'text/html',
-        'htm' => 'text/html',
-        'png' => 'image/png',
-        'jpg' => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'gif' => 'image/gif',
-        'svg' => 'image/svg+xml',
-        'ico' => 'image/x-icon',
-        'woff' => 'font/woff',
-        'woff2' => 'font/woff2',
-        'ttf' => 'font/ttf'
+        'htm' => 'text/html'
     ];
     
     if (isset($mimeTypes[$extension])) {
