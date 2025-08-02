@@ -91,27 +91,6 @@
         <div class="container">
             <h2>Our Furniture Collection</h2>
 
-            <!-- Filters -->
-            <div class="filters">
-                <div class="filter-group">
-                    <label for="categoryFilter">Category:</label>
-                    <select id="categoryFilter" onchange="filterProducts()">
-                        <option value="">All Categories</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="styleFilter">Style:</label>
-                    <select id="styleFilter" onchange="filterProducts()">
-                        <option value="">All Styles</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="priceRange">Price Range:</label>
-                    <input type="range" id="priceRange" min="0" max="2000" value="2000" onchange="filterProducts()">
-                    <span id="priceValue">$2000</span>
-                </div>
-            </div>
-
             <!-- Product Grid -->
             <div class="products-by-category" id="productsByCategory">
                 <!-- Products will be loaded here by category -->

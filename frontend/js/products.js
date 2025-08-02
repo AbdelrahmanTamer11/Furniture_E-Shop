@@ -43,7 +43,6 @@ class ProductManager {
 
         try {
             const params = new URLSearchParams({
-                ...app.filters,
                 page: this.currentPage,
                 limit: this.itemsPerPage
             });
@@ -210,168 +209,18 @@ class ProductManager {
         quantityInput.value = newValue;
     }
 
-    setupComparison() {
-        this.comparisonList = [];
-        this.createComparisonPanel();
-    }
 
-    createComparisonPanel() {
-        const panel = document.createElement('div');
-        panel.id = 'comparisonPanel';
-        panel.className = 'comparison-panel';
-        panel.innerHTML = `
-            <div class="comparison-header">
-                <h4>Compare Products</h4>
-                <button onclick="productManager.clearComparison()">Clear All</button>
-            </div>
-            <div class="comparison-items" id="comparisonItems">
-                <!-- Comparison items will go here -->
-            </div>
-            <div class="comparison-actions">
-                <button class="btn-primary" onclick="productManager.showComparison()" disabled id="compareBtn">
-                    Compare Selected
-                </button>
-            </div>
-        `;
 
-        document.body.appendChild(panel);
-    }
 
-    addToComparison(productId, productData) {
-        if (this.comparisonList.length >= 4) {
-            app.showAlert('You can compare up to 4 products at a time', 'warning');
-            return;
-        }
 
-        if (this.comparisonList.find(item => item.id === productId)) {
-            app.showAlert('Product already in comparison', 'warning');
-            return;
-        }
 
-        this.comparisonList.push(productData);
-        this.updateComparisonPanel();
-        app.showAlert('Product added to comparison', 'success');
-    }
 
-    removeFromComparison(productId) {
-        this.comparisonList = this.comparisonList.filter(item => item.id !== productId);
-        this.updateComparisonPanel();
-    }
 
-    updateComparisonPanel() {
-        const panel = document.getElementById('comparisonPanel');
-        const itemsContainer = document.getElementById('comparisonItems');
-        const compareBtn = document.getElementById('compareBtn');
 
-        if (this.comparisonList.length === 0) {
-            panel.style.display = 'none';
-            return;
-        }
 
-        panel.style.display = 'block';
-        itemsContainer.innerHTML = '';
 
-        this.comparisonList.forEach(product => {
-            const item = document.createElement('div');
-            item.className = 'comparison-item';
-            item.innerHTML = `
-                <img src="${product.image_url || '/images/placeholder-furniture.svg'}" alt="${product.name}">
-                <div class="item-info">
-                    <span class="item-name">${product.name}</span>
-                    <span class="item-price">$${parseFloat(product.price).toFixed(2)}</span>
-                </div>
-                <button onclick="productManager.removeFromComparison(${product.id})">×</button>
-            `;
-            itemsContainer.appendChild(item);
-        });
 
-        compareBtn.disabled = this.comparisonList.length < 2;
-    }
 
-    showComparison() {
-        if (this.comparisonList.length < 2) {
-            app.showAlert('Please select at least 2 products to compare', 'warning');
-            return;
-        }
-
-        this.createComparisonModal();
-    }
-
-    createComparisonModal() {
-        const modal = document.createElement('div');
-        modal.id = 'comparisonModal';
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="modal-content extra-large">
-                <div class="modal-header">
-                    <h3>Product Comparison</h3>
-                    <button class="close-modal" onclick="productManager.closeComparison()">×</button>
-                </div>
-                <div class="modal-body">
-                    <div class="comparison-table">
-                        ${this.generateComparisonTable()}
-                    </div>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-        modal.classList.add('show');
-    }
-
-    generateComparisonTable() {
-        let table = '<table><thead><tr><th>Feature</th>';
-
-        // Add headers for each product
-        this.comparisonList.forEach(product => {
-            table += `<th><img src="${product.image_url || '/images/placeholder-furniture.svg'}" alt="${product.name}"><br>${product.name}</th>`;
-        });
-
-        table += '</tr></thead><tbody>';
-
-        // Add comparison rows
-        const features = ['price', 'style', 'material', 'dimensions', 'stock_quantity'];
-        const featureLabels = ['Price', 'Style', 'Material', 'Dimensions', 'Stock'];
-
-        features.forEach((feature, index) => {
-            table += `<tr><td><strong>${featureLabels[index]}</strong></td>`;
-
-            this.comparisonList.forEach(product => {
-                let value = product[feature] || 'N/A';
-                if (feature === 'price') {
-                    value = `$${parseFloat(value).toFixed(2)}`;
-                } else if (feature === 'stock_quantity') {
-                    value = value > 0 ? `${value} available` : 'Out of stock';
-                }
-                table += `<td>${value}</td>`;
-            });
-
-            table += '</tr>';
-        });
-
-        // Add action row
-        table += '<tr><td><strong>Actions</strong></td>';
-        this.comparisonList.forEach(product => {
-            table += `<td><button class="btn-primary small" onclick="app.addToCart(${product.id})">Add to Cart</button></td>`;
-        });
-        table += '</tr>';
-
-        table += '</tbody></table>';
-
-        return table;
-    }
-
-    closeComparison() {
-        const modal = document.getElementById('comparisonModal');
-        if (modal) {
-            modal.remove();
-        }
-    }
-
-    clearComparison() {
-        this.comparisonList = [];
-        this.updateComparisonPanel();
-    }
 
     // Advanced filtering
     setupAdvancedFilters() {

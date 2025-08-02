@@ -647,23 +647,7 @@ function toggleAuth() {
     authModal.classList.toggle('show');
 }
 
-function filterProducts() {
-    const categoryFilter = document.getElementById('categoryFilter');
-    const styleFilter = document.getElementById('styleFilter');
-    const priceRange = document.getElementById('priceRange');
 
-    // Update filters
-    if (categoryFilter) app.filters.category = categoryFilter.value;
-    if (styleFilter) app.filters.style = styleFilter.value;
-    if (priceRange) app.filters.maxPrice = parseInt(priceRange.value);
-
-    // Debounce the API call to prevent too many requests
-    clearTimeout(window.filterTimeout);
-    window.filterTimeout = setTimeout(() => {
-        console.log('Filter changed, loading products with filters:', app.filters);
-        app.loadProducts();
-    }, 300); // Wait 300ms before making the API call
-}
 
 function loadMoreProducts() {
     // Implement pagination logic here
