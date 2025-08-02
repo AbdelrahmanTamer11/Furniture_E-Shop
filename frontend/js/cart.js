@@ -1,11 +1,11 @@
 // Shopping cart management module
 class CartManager {
     constructor() {
-        this.API_BASE = 'http://localhost:8000/backend/api';
+        this.API_BASE = '/backend/api';  // Remove the 'http://localhost:8000'
         this.cartItems = [];
-        this.cartTotal = 0;
-        this.cartCount = 0;
+        this.isOpen = false;
         this.setupCartHandlers();
+        this.loadCart();
     }
 
     setupCartHandlers() {
@@ -68,6 +68,8 @@ class CartManager {
 
             if (response.ok) {
                 const data = await response.json();
+                console.log('Loaded cart data:', data);
+
                 this.cartItems = data.items || [];
                 this.cartTotal = data.total || 0;
                 this.cartCount = data.count || 0;
@@ -197,35 +199,53 @@ class CartManager {
     }
 
     async addToCart(productId, quantity = 1) {
-        if (!app.currentUser) {
-            return this.addToGuestCart(productId, quantity);
-        }
+        console.log('CartManager addToCart called:', productId, quantity);
 
         try {
             const token = localStorage.getItem('auth_token');
-            const response = await fetch(`${this.API_BASE}/cart.php?action=add`, {
+            console.log('Making API call to add to cart...');
+
+            const response = await fetch(`${this.API_BASE}/cart.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    product_id: productId,
-                    quantity: quantity
+                    action: 'add',
+                    product_id: parseInt(productId),
+                    quantity: parseInt(quantity)
                 })
             });
 
+            console.log('Cart API response status:', response.status);
+
             if (response.ok) {
+                const result = await response.json();
+                console.log('Cart API success:', result);
+
+                // Update local cart data with API response
+                if (result.items) {
+                    this.cartItems = result.items;
+                    this.cartTotal = result.total || 0;
+                    this.cartCount = result.count || 0;
+                    this.updateCartUI();
+                }
+
                 this.showCartNotification('Item added to cart!', 'success');
-                this.loadCart();
                 this.showMiniCart();
             } else {
                 const error = await response.json();
-                app.showAlert(error.error || 'Failed to add item to cart', 'error');
+                console.error('Cart API error:', error);
+                if (window.app && window.app.showAlert) {
+                    window.app.showAlert(error.error || 'Failed to add item to cart', 'error');
+                }
             }
         } catch (error) {
             console.error('Add to cart error:', error);
-            app.showAlert('Failed to add item to cart', 'error');
+            if (window.app && window.app.showAlert) {
+                window.app.showAlert('Network error. Please try again.', 'error');
+            }
         }
     }
 
@@ -446,7 +466,7 @@ class CartManager {
         }, 5000);
     }
 
-    setupCheckout() {
+    async setupCheckout() {
         this.createCheckoutModal();
     }
 
@@ -725,6 +745,21 @@ class CartManager {
             console.error('Failed to merge guest cart:', error);
         }
     }
+
+    // Add this method to better detect if user is logged in
+    isUserLoggedIn() {
+        // Check multiple authentication indicators
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('authToken');
+        const authBtn = document.getElementById('authBtn');
+
+        // Check if app instance shows user is logged in
+        const appLoggedIn = window.app && window.app.currentUser;
+
+        // Check if auth button shows logged in state (contains "Hi,")
+        const isDisplayLoggedIn = authBtn && authBtn.textContent.includes('Hi,');
+
+        return !!(token || appLoggedIn || isDisplayLoggedIn);
+    }
 }
 
 // Initialize cart manager
@@ -732,16 +767,16 @@ const cartManager = new CartManager();
 
 // Global functions for HTML handlers
 function toggleCart() {
-    const cartSidebar = document.getElementById('cartSidebar');
-    if (cartSidebar.classList.contains('open')) {
-        cartManager.closeCart();
-    } else {
-        cartManager.openCart();
-    }
+    cartManager.openCart();
 }
 
 function checkout() {
-    cartManager.startCheckout();
+    if (!app.currentUser) {
+        app.showAlert('Please login to checkout', 'warning');
+        toggleAuth();
+        return;
+    }
+    cartManager.checkout();
 }
 
 // Export for global access

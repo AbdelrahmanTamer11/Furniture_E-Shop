@@ -66,9 +66,35 @@ class ProductManager {
         if (!grid) return;
 
         products.forEach(product => {
-            const productElement = document.createElement('div');
-            productElement.innerHTML = app.createProductCard(product);
-            grid.appendChild(productElement.firstElementChild);
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            productCard.innerHTML = `
+                <div class="product-image">
+                    <img src="${product.image_url || product.image || '/images/placeholder-furniture.svg'}" 
+                         alt="${product.name}" loading="lazy"
+                         onerror="this.src='/images/placeholder-furniture.svg'">
+                </div>
+                <div class="product-info">
+                    <h4>${product.name}</h4>
+                    <p class="product-description">${product.description || ''}</p>
+                    <div class="product-details">
+                        <span>Style: ${product.style || 'N/A'}</span>
+                        <span>Color: ${product.color || 'N/A'}</span>
+                        <span>Material: ${product.material || 'N/A'}</span>
+                    </div>
+                    <div class="product-dimensions">
+                        <small>Dimensions: ${product.dimensions || 'N/A'}</small>
+                    </div>
+                    <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
+                    <div class="product-stock">
+                        <small>In Stock: ${product.stock_quantity || 0} items</small>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="handleAddToCart(${product.id})">
+                        Add to Cart
+                    </button>
+                </div>
+            `;
+            grid.appendChild(productCard);
         });
     }
 

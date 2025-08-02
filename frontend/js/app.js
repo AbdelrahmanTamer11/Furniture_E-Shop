@@ -1,5 +1,5 @@
 // Main application JavaScript
-const API_BASE = './backend/api';
+const API_BASE = '/backend/api';  // Remove the './backend/api'
 
 class FurnitureApp {
     constructor() {
@@ -399,8 +399,7 @@ class FurnitureApp {
     }
 
     createProductCard(product) {
-        // Remove the dot from the image path
-        const imageUrl = product.image_url || '/images/products/placeholder.jpg';
+        const imageUrl = product.image_url || product.image || '/images/placeholder-furniture.svg';
 
         return `
             <div class="product-card">
@@ -408,24 +407,24 @@ class FurnitureApp {
                     <img src="${imageUrl}" 
                          alt="${product.name}" 
                          loading="lazy"
-                         onerror="this.src='https://via.placeholder.com/300x200/f8f9fa/6c757d?text=${encodeURIComponent(product.name)}'">
+                         onerror="this.src='/images/placeholder-furniture.svg'">
                 </div>
                 <div class="product-info">
                     <h4>${product.name}</h4>
-                    <p class="product-description">${product.description}</p>
+                    <p class="product-description">${product.description || ''}</p>
                     <div class="product-details">
-                        <span class="product-style">Style: ${product.style}</span>
-                        <span class="product-color">Color: ${product.color}</span>
-                        <span class="product-material">Material: ${product.material}</span>
+                        <span class="product-style">Style: ${product.style || 'N/A'}</span>
+                        <span class="product-color">Color: ${product.color || 'N/A'}</span>
+                        <span class="product-material">Material: ${product.material || 'N/A'}</span>
                     </div>
                     <div class="product-dimensions">
-                        <small>Dimensions: ${product.dimensions}</small>
+                        <small>Dimensions: ${product.dimensions || 'N/A'}</small>
                     </div>
                     <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
                     <div class="product-stock">
-                        <small>In Stock: ${product.stock_quantity} items</small>
+                        <small>In Stock: ${product.stock_quantity || 0} items</small>
                     </div>
-                    <button class="add-to-cart-btn" onclick="app.addToCart(${product.id})">
+                    <button class="add-to-cart-btn" onclick="handleAddToCart(${product.id})" data-product-id="${product.id}">
                         Add to Cart
                     </button>
                 </div>
@@ -468,36 +467,91 @@ class FurnitureApp {
     }
 
     async addToCart(productId, quantity = 1) {
+        console.log('=== APP ADD TO CART METHOD ===');
+        console.log('Product ID:', productId);
+        console.log('Quantity:', quantity);
+        console.log('Current user:', this.currentUser);
+
         if (!this.currentUser) {
-            this.showAlert('Please login to add items to cart', 'warning');
+            console.log('User not logged in in app method');
+            this.showAlert('You must login first', 'warning');
             toggleAuth();
             return;
         }
 
+        console.log('User is logged in, proceeding with API call...');
+
         try {
             const token = localStorage.getItem('auth_token');
-            const response = await fetch(`${this.API_BASE}/cart.php?action=add`, {
+            console.log('Token exists:', !!token);
+            console.log('API URL:', `${API_BASE}/cart.php`);
+
+            const requestBody = {
+                action: 'add',
+                product_id: parseInt(productId),
+                quantity: parseInt(quantity)
+            };
+
+            console.log('Request body:', requestBody);
+
+            const response = await fetch(`${API_BASE}/cart.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    product_id: productId,
-                    quantity: quantity
-                })
+                body: JSON.stringify(requestBody)
             });
 
+            console.log('API response status:', response.status);
+
+            const responseText = await response.text();
+            console.log('Raw response:', responseText);
+
             if (response.ok) {
-                this.showAlert('Item added to cart!', 'success');
-                this.loadCart();
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    console.log('Parsed API success result:', result);
+
+                    // Update local cart data
+                    if (result.items) {
+                        this.cartItems = result.items;
+                        this.updateCartUI();
+                    }
+
+                    this.showAlert('Item added to cart!', 'success');
+
+                    // Also update CartManager if available
+                    if (window.cartManager) {
+                        window.cartManager.cartItems = result.items || [];
+                        window.cartManager.cartTotal = result.total || 0;
+                        window.cartManager.cartCount = result.count || 0;
+                        window.cartManager.updateCartUI();
+                        window.cartManager.showCartNotification('Item added to cart!', 'success');
+                    }
+
+                } catch (parseError) {
+                    console.error('Failed to parse response as JSON:', parseError);
+                    this.showAlert('Item added to cart!', 'success');
+                }
             } else {
-                const error = await response.json();
-                this.showAlert(error.error || 'Failed to add item to cart', 'error');
+                console.error('API error status:', response.status);
+                console.error('API error response:', responseText);
+
+                let errorMessage = 'Failed to add item to cart';
+                try {
+                    const error = JSON.parse(responseText);
+                    errorMessage = error.error || error.message || errorMessage;
+                } catch (parseError) {
+                    console.error('Failed to parse error response:', parseError);
+                }
+
+                this.showAlert(errorMessage, 'error');
             }
         } catch (error) {
-            console.error('Add to cart error:', error);
-            this.showAlert('Failed to add item to cart', 'error');
+            console.error('Network or other error:', error);
+            this.showAlert('Network error. Please try again.', 'error');
         }
     }
 
@@ -600,12 +654,12 @@ class FurnitureApp {
         alert.className = `alert alert-${type}`;
         alert.textContent = message;
 
-        document.body.insertBefore(alert, document.body.firstChild);
+        document.body.appendChild(alert);
 
-        // Auto-remove after 5 seconds
+        // Auto remove after 3 seconds
         setTimeout(() => {
             alert.remove();
-        }, 5000);
+        }, 3000);
     }
 
     setupSmoothScrolling() {
@@ -634,6 +688,31 @@ class FurnitureApp {
             });
         }
     }
+
+    // Add this method to the FurnitureApp class for testing:
+
+    async testCartAPI() {
+        console.log('=== TESTING CART API ===');
+        try {
+            const response = await fetch(`${this.API_BASE}/cart.php`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Test API response status:', response.status);
+            const result = await response.text();
+            console.log('Test API response:', result);
+
+            return response.ok;
+        } catch (error) {
+            console.error('Test API error:', error);
+            return false;
+        }
+    }
+
+
 }
 
 // Global functions for HTML onclick handlers
@@ -647,10 +726,7 @@ function toggleAuth() {
     authModal.classList.toggle('show');
 }
 
-
-
 function loadMoreProducts() {
-    // Implement pagination logic here
     console.log('Load more products');
 }
 
@@ -690,12 +766,57 @@ function checkout() {
         return;
     }
 
-    // Implement checkout logic
     app.showAlert('Checkout functionality coming soon!', 'info');
+}
+
+// SINGLE GLOBAL ADD TO CART HANDLER
+function handleAddToCart(productId) {
+    console.log('=== ADD TO CART CLICKED ===');
+    console.log('Product ID:', productId);
+    console.log('App current user:', window.app ? window.app.currentUser : 'App not found');
+
+    if (!window.app) {
+        console.error('App not initialized');
+        alert('System error: App not initialized');
+        return;
+    }
+
+    // Check if user is logged in
+    if (!window.app.currentUser) {
+        console.log('User not logged in, showing auth modal');
+        window.app.showAlert('You must login first', 'warning');
+        toggleAuth();
+        return;
+    }
+
+    console.log('User is logged in, adding to cart...');
+    window.app.addToCart(productId);
 }
 
 // Initialize the application
 const app = new FurnitureApp();
-
-// Export for use in other modules
 window.app = app;
+
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM loaded, app initialized');
+
+    // Initialize other managers after DOM is ready
+    if (typeof CartManager !== 'undefined') {
+        window.cartManager = new CartManager();
+        console.log('CartManager initialized');
+    }
+
+    if (typeof ProductManager !== 'undefined') {
+        window.productManager = new ProductManager();
+        console.log('ProductManager initialized');
+    }
+});
+
+// Test function
+window.testAuth = function () {
+    console.log('=== AUTH TEST ===');
+    console.log('App exists:', !!window.app);
+    console.log('Current user:', window.app ? window.app.currentUser : 'No app');
+    console.log('Auth token:', localStorage.getItem('auth_token'));
+    return window.app ? !!window.app.currentUser : false;
+};

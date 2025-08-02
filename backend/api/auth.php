@@ -103,23 +103,26 @@ function handleLogin($userModel, $input) {
     $user = $userModel->verifyPassword($input['email'], $input['password']);
     
     if ($user) {
-        $sessionToken = $userModel->createSession($user['id']);
-        if ($sessionToken) {
-            echo json_encode([
-                'message' => 'Login successful',
-                'token' => $sessionToken,
-                'user' => [
-                    'id' => $user['id'],
-                    'username' => $user['username'],
-                    'email' => $user['email'],
-                    'first_name' => $user['first_name'],
-                    'last_name' => $user['last_name']
-                ]
-            ]);
-        } else {
-            http_response_code(500);
-            echo json_encode(['error' => 'Session creation failed']);
-        }
+        // Create a simple token (in production, use proper JWT)
+        $tokenData = [
+            'id' => $user['id'],
+            'email' => $user['email'],
+            'exp' => time() + (24 * 60 * 60) // 24 hours
+        ];
+        
+        $token = base64_encode(json_encode($tokenData));
+        
+        unset($user['password']); // Remove password from response
+        
+        $response = [
+            'success' => true,
+            'message' => 'Login successful',
+            'user' => $user,
+            'token' => $token
+        ];
+        
+        http_response_code(200);
+        echo json_encode($response);
     } else {
         http_response_code(401);
         echo json_encode(['error' => 'Invalid credentials']);
