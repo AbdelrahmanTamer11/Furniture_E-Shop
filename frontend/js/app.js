@@ -48,6 +48,11 @@ class FurnitureApp {
                 this.currentUser = data.user;
                 this.updateAuthUI();
                 this.loadCart();
+
+                // Start dynamic balance refresh
+                if (window.cartManager) {
+                    window.cartManager.startBalanceRefresh();
+                }
             } else {
                 localStorage.removeItem('auth_token');
             }
@@ -134,6 +139,12 @@ class FurnitureApp {
         this.cartItems = [];
         this.updateAuthUI();
         this.updateCartUI();
+
+        // Stop balance refresh when logging out
+        if (window.cartManager) {
+            window.cartManager.stopBalanceRefresh();
+        }
+
         this.showAlert('Logged out successfully', 'success');
 
         // Remove user menu if exists
@@ -458,8 +469,25 @@ class FurnitureApp {
 
             if (response.ok) {
                 const data = await response.json();
+                console.log('App loadCart response:', data);
+
                 this.cartItems = data.items || [];
+                this.userBalance = parseFloat(data.balance || 0);
+
+                console.log('App - Set userBalance to:', this.userBalance);
+
                 this.updateCartUI();
+
+                // Also update CartManager if it exists
+                if (window.cartManager) {
+                    window.cartManager.userBalance = this.userBalance;
+                    window.cartManager.cartItems = this.cartItems;
+                    window.cartManager.cartTotal = parseFloat(data.total || 0);
+                    window.cartManager.cartCount = parseInt(data.count || 0);
+                    window.cartManager.updateCartUI();
+                }
+            } else {
+                console.error('App loadCart failed:', response.status);
             }
         } catch (error) {
             console.error('Failed to load cart:', error);

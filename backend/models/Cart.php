@@ -96,5 +96,57 @@ class Cart {
         $result = $stmt->fetch();
         return $result['count'] ?? 0;
     }
+    
+    public function getUserBalance($userId) {
+        try {
+            error_log("=== DYNAMIC BALANCE FETCH ===");
+            error_log("Fetching fresh balance for user ID: " . $userId);
+            
+            // Ensure userId is an integer
+            $userId = intval($userId);
+            
+            if ($userId <= 0) {
+                error_log("Invalid user ID: " . $userId);
+                return 0.0;
+            }
+            
+            // Force fresh data by clearing any potential cache
+            $sql = "SELECT balance FROM users WHERE id = :user_id LIMIT 1";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':user_id' => $userId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            error_log("Fresh balance query result: " . print_r($result, true));
+            
+            if ($result && isset($result['balance'])) {
+                $balance = floatval($result['balance']);
+                error_log("Dynamic balance fetched: " . $balance);
+                return $balance;
+            } else {
+                error_log("No balance found for user");
+                return 0.0;
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error fetching dynamic balance: " . $e->getMessage());
+            return 0.0;
+        }
+    }
+    
+    // Method to get complete cart data with fresh balance
+    public function getCartWithBalance($userId) {
+        $cartItems = $this->getCartItems($userId);
+        $cartTotal = $this->getCartTotal($userId);
+        $cartCount = $this->getCartCount($userId);
+        $userBalance = $this->getUserBalance($userId); // Always fetch fresh
+        
+        return [
+            'items' => $cartItems,
+            'total' => floatval($cartTotal),
+            'count' => intval($cartCount),
+            'balance' => floatval($userBalance),
+            'timestamp' => time()
+        ];
+    }
 }
 ?>

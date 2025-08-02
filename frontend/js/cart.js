@@ -1,9 +1,12 @@
 // Shopping cart management module
 class CartManager {
     constructor() {
-        this.API_BASE = '/backend/api';  // Remove the 'http://localhost:8000'
+        this.API_BASE = '/backend/api';
         this.cartItems = [];
         this.isOpen = false;
+        this.cartTotal = 0;
+        this.cartCount = 0;
+        this.userBalance = 0;
         this.setupCartHandlers();
         this.loadCart();
     }
@@ -53,31 +56,62 @@ class CartManager {
     }
 
     async loadCart() {
+        console.log('=== LOAD CART START ===');
+        console.log('Current user from app:', window.app?.currentUser);
+        console.log('Auth token exists:', !!localStorage.getItem('auth_token'));
+
         if (!app.currentUser) {
+            console.log('No current user, loading guest cart');
             this.loadGuestCart();
             return;
         }
 
         try {
             const token = localStorage.getItem('auth_token');
+            console.log('Token length:', token?.length);
+            console.log('Token preview:', token?.substring(0, 50) + '...');
+
             const response = await fetch(`${this.API_BASE}/cart.php`, {
+                method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             });
 
+            console.log('Cart API response status:', response.status);
+
             if (response.ok) {
                 const data = await response.json();
-                console.log('Loaded cart data:', data);
+                console.log('=== CART API FULL RESPONSE ===', data);
 
                 this.cartItems = data.items || [];
-                this.cartTotal = data.total || 0;
-                this.cartCount = data.count || 0;
+                this.cartTotal = parseFloat(data.total || 0);
+                this.cartCount = parseInt(data.count || 0);
+                this.userBalance = parseFloat(data.balance || 0);
+
+                console.log('=== PARSED VALUES ===');
+                console.log('cartItems count:', this.cartItems.length);
+                console.log('cartTotal:', this.cartTotal);
+                console.log('cartCount:', this.cartCount);
+                console.log('userBalance:', this.userBalance);
+                console.log('userBalance type:', typeof this.userBalance);
+
+                if (data.debug) {
+                    console.log('=== DEBUG INFO ===', data.debug);
+                }
+
                 this.updateCartUI();
+            } else {
+                console.error('Failed to load cart, response not ok:', response.status);
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
             }
         } catch (error) {
             console.error('Failed to load cart:', error);
         }
+
+        console.log('=== LOAD CART END ===');
     }
 
     loadGuestCart() {
@@ -114,6 +148,8 @@ class CartManager {
         this.updateCartItems();
         this.updateCartTotal();
         this.updateCartBadge();
+        this.updateBalanceDisplay();
+        this.updateCheckoutButton();
     }
 
     updateCartCount() {
@@ -198,6 +234,101 @@ class CartManager {
         }
     }
 
+    updateBalanceDisplay() {
+        console.log('=== UPDATE BALANCE DISPLAY START ===');
+        console.log('Current user exists:', !!window.app?.currentUser);
+        console.log('User balance value:', this.userBalance);
+        console.log('User balance type:', typeof this.userBalance);
+
+        const balanceSection = document.getElementById('cartBalanceSection');
+        const balanceDisplay = document.getElementById('userBalanceDisplay');
+
+        console.log('Balance section found:', !!balanceSection);
+        console.log('Balance display found:', !!balanceDisplay);
+
+        // Only show balance for logged-in users
+        if (!window.app?.currentUser) {
+            console.log('No current user, hiding balance');
+            if (balanceSection) {
+                balanceSection.style.display = 'none';
+            }
+            return;
+        }
+
+        // Show balance section
+        if (balanceSection) {
+            balanceSection.style.display = 'block';
+            console.log('Balance section made visible');
+        } else {
+            console.error('Balance section not found in DOM');
+            return;
+        }
+
+        // Update balance amount
+        if (balanceDisplay) {
+            const balance = parseFloat(this.userBalance || 0);
+            const formattedBalance = balance.toFixed(2);
+            balanceDisplay.textContent = formattedBalance;
+            console.log('Balance display updated to:', formattedBalance);
+
+            // Force DOM update
+            balanceDisplay.style.color = balance > 0 ? '#28a745' : '#dc3545';
+        } else {
+            console.error('Balance display element not found in DOM');
+            return;
+        }
+
+        // Update visual state based on affordability
+        this.updateBalanceState();
+
+        console.log('=== UPDATE BALANCE DISPLAY END ===');
+    }
+
+    updateBalanceState() {
+        const balanceSection = document.getElementById('cartBalanceSection');
+        const total = parseFloat(this.cartTotal || 0);
+        const balance = parseFloat(this.userBalance || 0);
+        const canAfford = balance >= total;
+
+        if (balanceSection) {
+            // Remove existing classes
+            balanceSection.classList.remove('sufficient', 'insufficient');
+
+            // Add appropriate class
+            if (canAfford) {
+                balanceSection.classList.add('sufficient');
+            } else {
+                balanceSection.classList.add('insufficient');
+            }
+        }
+    }
+
+    updateCheckoutButton() {
+        const checkoutBtn = document.querySelector('.cart-footer .btn-primary');
+        if (!checkoutBtn) return;
+
+        const hasItems = this.cartItems.length > 0;
+        const isLoggedIn = window.app?.currentUser;
+        const canAfford = !isLoggedIn || (parseFloat(this.userBalance || 0) >= parseFloat(this.cartTotal || 0));
+
+        if (hasItems && canAfford) {
+            checkoutBtn.disabled = false;
+            checkoutBtn.textContent = 'Checkout';
+            checkoutBtn.style.opacity = '1';
+            checkoutBtn.style.cursor = 'pointer';
+        } else if (hasItems && !canAfford) {
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'Insufficient Balance';
+            checkoutBtn.style.opacity = '0.6';
+            checkoutBtn.style.cursor = 'not-allowed';
+        } else {
+            checkoutBtn.disabled = hasItems ? false : true;
+            checkoutBtn.textContent = 'Checkout';
+            checkoutBtn.style.opacity = hasItems ? '1' : '0.6';
+            checkoutBtn.style.cursor = hasItems ? 'pointer' : 'not-allowed';
+        }
+    }
+
     async addToCart(productId, quantity = 1) {
         console.log('CartManager addToCart called:', productId, quantity);
 
@@ -225,10 +356,18 @@ class CartManager {
                 console.log('Cart API success:', result);
 
                 // Update local cart data with API response
-                if (result.items) {
-                    this.cartItems = result.items;
-                    this.cartTotal = result.total || 0;
-                    this.cartCount = result.count || 0;
+                if (result.items !== undefined) {
+                    this.cartItems = result.items || [];
+                    this.cartTotal = parseFloat(result.total || 0);
+                    this.cartCount = parseInt(result.count || 0);
+                    this.userBalance = parseFloat(result.balance || 0);
+
+                    console.log('Updated cart data:');
+                    console.log('- Items:', this.cartItems.length);
+                    console.log('- Total:', this.cartTotal);
+                    console.log('- Count:', this.cartCount);
+                    console.log('- Balance:', this.userBalance);
+
                     this.updateCartUI();
                 }
 
