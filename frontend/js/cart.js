@@ -973,7 +973,7 @@ class CartManager {
                     </div>
                     
                     <div style="margin-top: 2rem;">
-                        <button class="btn-primary" onclick="this.parentElement.parentElement.parentElement.remove(); document.body.style.overflow = '';">
+                        <button class="btn-primary" onclick="cartManager.refreshProductStock(); this.parentElement.parentElement.parentElement.remove(); document.body.style.overflow = '';">
                             Continue Shopping
                         </button>
                     </div>
@@ -988,8 +988,60 @@ class CartManager {
             if (modal.parentNode) {
                 modal.remove();
                 document.body.style.overflow = '';
+                // Refresh product stock when modal closes
+                this.refreshProductStock();
             }
         }, 15000);
+    }
+
+    // Add new method to refresh product stock display
+    refreshProductStock() {
+        // Trigger a reload of products to show updated stock
+        if (window.app && window.app.loadProducts) {
+            console.log('Refreshing product stock after successful checkout');
+            window.app.loadProducts();
+        }
+
+        // Also refresh any product cards currently visible
+        this.updateVisibleProductStock();
+    }
+
+    updateVisibleProductStock() {
+        // Find all product cards and refresh their stock display
+        const productCards = document.querySelectorAll('.product-card');
+        productCards.forEach(card => {
+            const addToCartBtn = card.querySelector('.add-to-cart-btn');
+            if (addToCartBtn && addToCartBtn.dataset.productId) {
+                this.refreshSingleProductStock(addToCartBtn.dataset.productId, card);
+            }
+        });
+    }
+
+    async refreshSingleProductStock(productId, productCard) {
+        try {
+            const response = await fetch(`${this.API_BASE}/products.php?id=${productId}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.product) {
+                    // Update stock display
+                    const stockElement = productCard.querySelector('.product-stock small');
+                    if (stockElement) {
+                        const newStock = data.product.stock_quantity;
+                        stockElement.textContent = `In Stock: ${newStock} items`;
+
+                        // Disable button if out of stock
+                        const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
+                        if (newStock <= 0 && addToCartBtn) {
+                            addToCartBtn.disabled = true;
+                            addToCartBtn.textContent = 'Out of Stock';
+                            addToCartBtn.style.background = '#dc3545';
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Failed to refresh product stock:', error);
+        }
     }
 
     showAlert(message, type = 'info') {

@@ -24,6 +24,41 @@ class Order {
                 throw new Exception('Insufficient balance');
             }
             
+            // Check stock availability and reserve products
+            foreach ($orderData['items'] as $item) {
+                $productId = $item['product_id'];
+                $quantity = intval($item['quantity']);
+                
+                // Get current stock
+                $sql = "SELECT stock_quantity FROM products WHERE id = :product_id FOR UPDATE";
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute([':product_id' => $productId]);
+                $product = $stmt->fetch();
+                
+                if (!$product) {
+                    throw new Exception("Product ID $productId not found");
+                }
+                
+                $currentStock = intval($product['stock_quantity']);
+                if ($currentStock < $quantity) {
+                    throw new Exception("Insufficient stock for product ID $productId. Available: $currentStock, Requested: $quantity");
+                }
+                
+                // Update stock quantity
+                $sql = "UPDATE products SET stock_quantity = stock_quantity - :quantity WHERE id = :product_id";
+                $stmt = $this->db->prepare($sql);
+                $updateSuccess = $stmt->execute([
+                    ':quantity' => $quantity,
+                    ':product_id' => $productId
+                ]);
+                
+                if (!$updateSuccess) {
+                    throw new Exception("Failed to update stock for product ID $productId");
+                }
+                
+                error_log("Stock updated for product $productId: reduced by $quantity");
+            }
+            
             // Create order
             $sql = "INSERT INTO orders (
                 user_id, order_number, subtotal, shipping_cost, tax_amount, total_amount, 
@@ -78,6 +113,8 @@ class Order {
             $stmt->execute([':user_id' => $userId]);
             
             $this->db->commit();
+            
+            error_log("Order created successfully: $orderNumber");
             
             return [
                 'success' => true,

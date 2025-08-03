@@ -411,6 +411,7 @@ class FurnitureApp {
 
     createProductCard(product) {
         const imageUrl = product.image_url || product.image || '/images/placeholder-furniture.svg';
+        const isOutOfStock = parseInt(product.stock_quantity) <= 0;
 
         return `
             <div class="product-card">
@@ -419,6 +420,7 @@ class FurnitureApp {
                          alt="${product.name}" 
                          loading="lazy"
                          onerror="this.src='/images/placeholder-furniture.svg'">
+                    ${isOutOfStock ? '<div class="out-of-stock-overlay">Out of Stock</div>' : ''}
                 </div>
                 <div class="product-info">
                     <h4>${product.name}</h4>
@@ -433,10 +435,15 @@ class FurnitureApp {
                     </div>
                     <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
                     <div class="product-stock">
-                        <small>In Stock: ${product.stock_quantity || 0} items</small>
+                        <small class="${isOutOfStock ? 'out-of-stock' : 'in-stock'}">
+                            ${isOutOfStock ? 'Out of Stock' : `In Stock: ${product.stock_quantity || 0} items`}
+                        </small>
                     </div>
-                    <button class="add-to-cart-btn" onclick="handleAddToCart(${product.id})" data-product-id="${product.id}">
-                        Add to Cart
+                    <button class="add-to-cart-btn ${isOutOfStock ? 'disabled' : ''}" 
+                            onclick="handleAddToCart(${product.id})" 
+                            data-product-id="${product.id}"
+                            ${isOutOfStock ? 'disabled' : ''}>
+                        ${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
                     </button>
                 </div>
             </div>
