@@ -47,6 +47,47 @@ class CartManager {
         const cartSidebar = document.getElementById('cartSidebar');
         cartSidebar.classList.add('open');
         document.body.style.overflow = 'hidden'; // Prevent background scrolling
+
+        // CRITICAL: Fetch fresh balance every time cart is opened
+        this.refreshBalanceOnOpen();
+    }
+
+    // Add new method to refresh balance when cart opens
+    async refreshBalanceOnOpen() {
+        if (!window.app?.currentUser) {
+            return; // No user logged in, no balance to fetch
+        }
+
+        try {
+            console.log('=== REFRESHING BALANCE ON CART OPEN ===');
+            const token = localStorage.getItem('auth_token');
+
+            const response = await fetch(`${this.API_BASE}/balance.php`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Balance refresh on cart open:', data);
+
+                if (data.balance !== undefined) {
+                    this.userBalance = parseFloat(data.balance);
+                    console.log('Balance updated on cart open to:', this.userBalance);
+
+                    // Update UI immediately
+                    this.updateBalanceDisplay();
+                    this.updateCheckoutButton();
+                }
+            } else {
+                console.error('Balance refresh on cart open failed:', response.status);
+            }
+        } catch (error) {
+            console.error('Error refreshing balance on cart open:', error);
+        }
     }
 
     closeCart() {

@@ -770,8 +770,13 @@ class FurnitureApp {
 
 // Global functions for HTML onclick handlers
 function toggleCart() {
-    const cartSidebar = document.getElementById('cartSidebar');
-    cartSidebar.classList.toggle('open');
+    if (window.cartManager) {
+        window.cartManager.openCart();
+    } else {
+        // Fallback if cartManager not available
+        const cartSidebar = document.getElementById('cartSidebar');
+        cartSidebar.classList.toggle('open');
+    }
 }
 
 function toggleAuth() {

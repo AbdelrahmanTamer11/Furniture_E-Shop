@@ -53,6 +53,38 @@ class CheckoutManager {
         this.orderData.shipping = shipping;
         this.orderData.tax = tax;
         this.orderData.total = total;
+
+        // Also refresh balance if user is logged in
+        this.refreshUserBalanceIfNeeded();
+    }
+
+    // Add method to refresh balance when needed
+    async refreshUserBalanceIfNeeded() {
+        if (!window.app?.currentUser) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('auth_token');
+            const response = await fetch('/backend/api/balance.php', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (window.cartManager) {
+                    window.cartManager.userBalance = parseFloat(data.balance || 0);
+                    window.cartManager.updateBalanceDisplay();
+                    window.cartManager.updateCheckoutButton();
+                }
+            }
+        } catch (error) {
+            console.error('Error refreshing balance in checkout:', error);
+        }
     }
 
     selectPaymentMethod(method) {
