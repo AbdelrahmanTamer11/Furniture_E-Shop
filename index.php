@@ -126,5 +126,36 @@ $footerReplacement = '
 // Replace the existing footer
 $indexContent = preg_replace('/<footer[^>]*>.*?<\/footer>/s', $footerReplacement, $indexContent);
 
+// Add script to scroll to home on page load before closing body tag
+$scrollToHomeScript = '
+<script>
+// Ensure page always starts at home section
+window.addEventListener("load", function() {
+    setTimeout(function() {
+        const homeSection = document.getElementById("home");
+        if (homeSection) {
+            homeSection.scrollIntoView({ 
+                behavior: "smooth", 
+                block: "start" 
+            });
+        } else {
+            window.scrollTo({ 
+                top: 0, 
+                behavior: "smooth" 
+            });
+        }
+    }, 50);
+});
+
+// Also handle page refresh/reload
+window.addEventListener("beforeunload", function() {
+    window.scrollTo(0, 0);
+});
+</script>
+</body>';
+
+// Replace closing body tag with script + closing body tag
+$indexContent = str_replace('</body>', $scrollToHomeScript, $indexContent);
+
 echo $indexContent;
 ?>

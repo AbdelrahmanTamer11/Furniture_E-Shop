@@ -1157,10 +1157,41 @@ class CartManager {
 // Initialize cart manager
 const cartManager = new CartManager();
 
+// Add scroll to home on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Scroll to home section immediately when page loads
+    setTimeout(() => {
+        const homeSection = document.getElementById('home');
+        if (homeSection) {
+            homeSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        } else {
+            // Fallback: scroll to top
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+    }, 100); // Small delay to ensure page is fully loaded
+});
+
 // Global functions for HTML handlers
 function toggleCart() {
     if (window.cartManager) {
         window.cartManager.openCart();
+    }
+}
+
+function closeCart() {
+    if (window.cartManager) {
+        window.cartManager.closeCart();
+    } else {
+        // Fallback if cartManager not available
+        const cartSidebar = document.getElementById('cartSidebar');
+        cartSidebar.classList.remove('open');
+        document.body.style.overflow = '';
     }
 }
 
