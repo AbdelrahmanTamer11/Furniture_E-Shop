@@ -99,10 +99,9 @@
 
 /* Checkout Content */
 .checkout-content {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 4rem;
-    align-items: start;
+    display: block;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 /* Checkout Forms */
@@ -117,6 +116,9 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.6);
     position: relative;
     overflow: hidden;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .checkout-forms::before {
@@ -299,202 +301,15 @@
     letter-spacing: 0.5px;
 }
 
-/* Order Review */
-.order-review {
-    margin-bottom: 2rem;
-}
-
-.review-section {
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 15px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid rgba(139, 69, 19, 0.1);
-    position: relative;
-}
-
-.review-section h3 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #2c1810;
-    margin-bottom: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.review-content {
-    color: #654321;
-    line-height: 1.6;
-}
-
-.edit-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: rgba(139, 69, 19, 0.1);
-    border: 1px solid #cd853f;
-    color: #8b4513;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.edit-btn:hover {
-    background: #cd853f;
-    color: #faf8f3;
-}
-
-/* Order Summary */
-.order-summary {
-    position: sticky;
-    top: 140px;
-}
-
-.summary-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 222, 179, 0.7) 100%);
-    backdrop-filter: blur(20px);
-    border-radius: 25px;
-    padding: 2rem;
-    border: 1px solid rgba(139, 69, 19, 0.1);
-    box-shadow:
-        0 20px 50px rgba(139, 69, 19, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.summary-card h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #2c1810;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Order Items */
-.order-items {
-    margin-bottom: 1.5rem;
-}
-
-.order-item {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 12px;
-    margin-bottom: 1rem;
-    border: 1px solid rgba(139, 69, 19, 0.1);
-}
-
-.item-image {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    object-fit: cover;
-    border: 2px solid rgba(205, 133, 63, 0.3);
-}
-
-.item-details {
-    flex: 1;
-}
-
-.item-name {
-    font-weight: 600;
-    color: #2c1810;
-    margin-bottom: 0.25rem;
-    font-size: 0.9rem;
-}
-
-.item-price {
-    color: #8b0000;
-    font-weight: 600;
-}
-
-.item-quantity {
-    color: #654321;
-    font-size: 0.8rem;
-}
-
-/* Order Totals */
-.order-totals {
-    border-top: 1px solid rgba(205, 133, 63, 0.2);
-    padding-top: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-    color: #654321;
-}
-
-.total-row.total {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #2c1810;
-    border-top: 1px solid rgba(205, 133, 63, 0.2);
-    padding-top: 0.75rem;
-    margin-top: 0.75rem;
-}
-
-/* Promo Code */
-.promo-code {
-    margin-bottom: 1.5rem;
-}
-
-.promo-input {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.promo-input input {
-    flex: 1;
-    padding: 0.75rem;
-    border: 2px solid rgba(205, 133, 63, 0.3);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    background: rgba(255, 255, 255, 0.8);
-}
-
-.apply-btn {
-    padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #8b4513, #cd853f);
-    color: #faf8f3;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.apply-btn:hover {
-    background: linear-gradient(135deg, #cd853f, #deb887);
-    transform: translateY(-1px);
-}
-
-/* Security Info */
+/* Hide order summary related elements */
+.order-summary,
+.summary-card,
+.order-items,
+.order-totals,
+.total-row,
+.promo-code,
 .security-info {
-    border-top: 1px solid rgba(205, 133, 63, 0.2);
-    padding-top: 1rem;
-}
-
-.security-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-    color: #654321;
-    font-size: 0.85rem;
-}
-
-.security-icon {
-    font-size: 1rem;
+    display: none !important;
 }
 
 /* Success Modal */
@@ -530,17 +345,17 @@
 /* Responsive Design */
 @media (max-width: 1200px) {
     .checkout-content {
-        grid-template-columns: 1fr;
-        gap: 3rem;
-    }
-
-    .order-summary {
-        position: static;
-        order: -1;
+        max-width: 100%;
+        padding: 0 1rem;
     }
 }
 
 @media (max-width: 768px) {
+    .checkout-forms {
+        max-width: 100% !important;
+        margin: 0;
+    }
+
     .checkout-container {
         padding: 0 1rem;
     }

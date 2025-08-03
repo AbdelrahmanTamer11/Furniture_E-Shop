@@ -27,44 +27,27 @@ class CheckoutManager {
         // Form validation
         this.setupFormValidation();
 
-        // Promo code
-        document.querySelector('.apply-btn').addEventListener('click', () => {
-            this.applyPromoCode();
-        });
+        // Promo code - only if element exists
+        const applyBtn = document.querySelector('.apply-btn');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                this.applyPromoCode();
+            });
+        }
     }
 
     loadCartItems() {
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        const orderItemsContainer = document.getElementById('orderItems');
-
-        if (cart.length === 0) {
-            orderItemsContainer.innerHTML = '<p>Your cart is empty</p>';
-            return;
-        }
-
-        orderItemsContainer.innerHTML = cart.map(item => `
-            <div class="order-item">
-                <img src="${item.image}" alt="${item.name}" class="item-image">
-                <div class="item-details">
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-quantity">Qty: ${item.quantity}</div>
-                    <div class="item-price">$${(item.price * item.quantity).toFixed(2)}</div>
-                </div>
-            </div>
-        `).join('');
+        // Remove this method content since we're not showing order items in checkout
+        console.log('Cart items loading skipped - order summary removed');
     }
 
     calculateTotals() {
+        // Simplified calculation without UI updates
         const cart = JSON.parse(localStorage.getItem('cart')) || [];
         const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const shipping = subtotal > 500 ? 0 : 29.99;
         const tax = subtotal * 0.08; // 8% tax
         const total = subtotal + shipping + tax;
-
-        document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
-        document.getElementById('shipping').textContent = shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`;
-        document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
-        document.getElementById('total').textContent = `$${total.toFixed(2)}`;
 
         this.orderData.subtotal = subtotal;
         this.orderData.shipping = shipping;
@@ -328,7 +311,13 @@ class CheckoutManager {
     }
 
     applyPromoCode() {
-        const promoCode = document.getElementById('promoCode').value.trim();
+        const promoCodeInput = document.getElementById('promoCode');
+        if (!promoCodeInput) {
+            console.log('Promo code input not found - feature disabled');
+            return;
+        }
+
+        const promoCode = promoCodeInput.value.trim();
 
         if (!promoCode) {
             this.showError('Please enter a promo code.');
@@ -365,24 +354,27 @@ class CheckoutManager {
         this.orderData.tax = tax;
         this.orderData.total = total;
 
-        // Update display
-        document.getElementById('subtotal').textContent = `$${newSubtotal.toFixed(2)}`;
-        document.getElementById('shipping').textContent = shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`;
-        document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
-        document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+        // Update display only if elements exist
+        const subtotalEl = document.getElementById('subtotal');
+        const shippingEl = document.getElementById('shipping');
+        const taxEl = document.getElementById('tax');
+        const totalEl = document.getElementById('total');
 
-        // Add discount row if not exists
-        if (!document.querySelector('.discount-row')) {
+        if (subtotalEl) subtotalEl.textContent = `$${newSubtotal.toFixed(2)}`;
+        if (shippingEl) shippingEl.textContent = shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`;
+        if (taxEl) taxEl.textContent = `$${tax.toFixed(2)}`;
+        if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
+
+        // Add discount row if not exists and parent exists
+        const totalRow = document.querySelector('.total-row.total');
+        if (totalRow && !document.querySelector('.discount-row')) {
             const discountRow = document.createElement('div');
             discountRow.className = 'total-row discount-row';
             discountRow.innerHTML = `
                 <span>Discount:</span>
                 <span style="color: #16a34a;">-$${discount.toFixed(2)}</span>
             `;
-            document.querySelector('.total-row.total').parentNode.insertBefore(
-                discountRow,
-                document.querySelector('.total-row.total')
-            );
+            totalRow.parentNode.insertBefore(discountRow, totalRow);
         }
     }
 
@@ -479,15 +471,21 @@ class CheckoutManager {
 
 // Global functions for navigation
 function nextStep() {
-    checkoutManager.nextStep();
+    if (window.checkoutManager) {
+        window.checkoutManager.nextStep();
+    }
 }
 
 function prevStep() {
-    checkoutManager.prevStep();
+    if (window.checkoutManager) {
+        window.checkoutManager.prevStep();
+    }
 }
 
 function editStep(stepNumber) {
-    checkoutManager.editStep(stepNumber);
+    if (window.checkoutManager) {
+        window.checkoutManager.editStep(stepNumber);
+    }
 }
 
 function goBack() {
@@ -495,7 +493,10 @@ function goBack() {
 }
 
 function goToHome() {
-    document.getElementById('successModal').classList.remove('show');
+    const successModal = document.getElementById('successModal');
+    if (successModal) {
+        successModal.classList.remove('show');
+    }
     window.location.href = '/';
 }
 
@@ -505,7 +506,9 @@ function viewOrder() {
 }
 
 function placeOrder() {
-    checkoutManager.placeOrder();
+    if (window.checkoutManager) {
+        window.checkoutManager.placeOrder();
+    }
 }
 
 // Cart functions (simplified)
@@ -518,6 +521,7 @@ function toggleCart() {
 let checkoutManager;
 document.addEventListener('DOMContentLoaded', () => {
     checkoutManager = new CheckoutManager();
+    window.checkoutManager = checkoutManager; // Make it globally accessible
 });
 
 // Add notification animations

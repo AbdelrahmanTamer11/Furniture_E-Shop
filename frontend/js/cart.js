@@ -663,113 +663,85 @@ class CartManager {
                 </div>
                 <div class="modal-body">
                     <div class="checkout-container">
-                        <div class="checkout-left">
-                            <div class="checkout-section">
-                                <h4>Shipping Information</h4>
-                                <form id="checkoutForm">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="firstName">First Name</label>
-                                            <input type="text" id="firstName" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="lastName">Last Name</label>
-                                            <input type="text" id="lastName" required>
-                                        </div>
+                        <div class="checkout-section">
+                            <h4>Shipping Information</h4>
+                            <form id="checkoutForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="firstName">First Name</label>
+                                        <input type="text" id="firstName" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="email">Email</label>
-                                        <input type="email" id="email" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="phone">Phone</label>
-                                        <input type="tel" id="phone" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="address">Address</label>
-                                        <input type="text" id="address" required>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="city">City</label>
-                                            <input type="text" id="city" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="state">State</label>
-                                            <input type="text" id="state" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="zipCode">Zip Code</label>
-                                            <input type="text" id="zipCode" required>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            
-                            <div class="checkout-section">
-                                <h4>Payment Method</h4>
-                                <div class="payment-methods">
-                                    <label class="payment-option">
-                                        <input type="radio" name="payment" value="card" checked>
-                                        <span>Credit/Debit Card</span>
-                                    </label>
-                                    <label class="payment-option">
-                                        <input type="radio" name="payment" value="paypal">
-                                        <span>PayPal</span>
-                                    </label>
-                                    <label class="payment-option">
-                                        <input type="radio" name="payment" value="apple_pay">
-                                        <span>Apple Pay</span>
-                                    </label>
-                                </div>
-                                
-                                <div class="card-details" id="cardDetails">
-                                    <div class="form-group">
-                                        <label for="cardNumber">Card Number</label>
-                                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456">
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="expiryDate">Expiry Date</label>
-                                            <input type="text" id="expiryDate" placeholder="MM/YY">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="cvv">CVV</label>
-                                            <input type="text" id="cvv" placeholder="123">
-                                        </div>
+                                        <label for="lastName">Last Name</label>
+                                        <input type="text" id="lastName" required>
                                     </div>
                                 </div>
-                            </div>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone">Phone</label>
+                                    <input type="tel" id="phone" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="address">Address</label>
+                                    <input type="text" id="address" required>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="city">City</label>
+                                        <input type="text" id="city" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="state">State</label>
+                                        <input type="text" id="state" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="zipCode">Zip Code</label>
+                                        <input type="text" id="zipCode" required>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                         
-                        <div class="checkout-right">
-                            <div class="order-summary">
-                                <h4>Order Summary</h4>
-                                <div class="summary-items" id="checkoutItems">
-                                    <!-- Cart items will be populated here -->
-                                </div>
-                                <div class="summary-totals">
-                                    <div class="summary-line">
-                                        <span>Subtotal:</span>
-                                        <span id="checkoutSubtotal">$0.00</span>
-                                    </div>
-                                    <div class="summary-line">
-                                        <span>Shipping:</span>
-                                        <span id="checkoutShipping">$19.99</span>
-                                    </div>
-                                    <div class="summary-line">
-                                        <span>Tax:</span>
-                                        <span id="checkoutTax">$0.00</span>
-                                    </div>
-                                    <div class="summary-line total">
-                                        <span>Total:</span>
-                                        <span id="checkoutTotal">$0.00</span>
-                                    </div>
-                                </div>
-                                <button class="btn-primary full-width" onclick="cartManager.processPayment()">
-                                    Place Order
-                                </button>
+                        <div class="checkout-section">
+                            <h4>Payment Method</h4>
+                            <div class="payment-methods">
+                                <label class="payment-option">
+                                    <input type="radio" name="payment" value="card" checked>
+                                    <span>Credit/Debit Card</span>
+                                </label>
+                                <label class="payment-option">
+                                    <input type="radio" name="payment" value="paypal">
+                                    <span>PayPal</span>
+                                </label>
+                                <label class="payment-option">
+                                    <input type="radio" name="payment" value="apple_pay">
+                                    <span>Apple Pay</span>
+                                </label>
                             </div>
+                            
+                            <div class="card-details" id="cardDetails">
+                                <div class="form-group">
+                                    <label for="cardNumber">Card Number</label>
+                                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="expiryDate">Expiry Date</label>
+                                        <input type="text" id="expiryDate" placeholder="MM/YY">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cvv">CVV</label>
+                                        <input type="text" id="cvv" placeholder="123">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn-primary full-width" onclick="cartManager.processPayment()">
+                                Place Order
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1134,34 +1106,8 @@ class CartManager {
     }
 
     updateCheckoutSummary() {
-        const itemsContainer = document.getElementById('checkoutItems');
-        const subtotalElement = document.getElementById('checkoutSubtotal');
-        const shippingElement = document.getElementById('checkoutShipping');
-        const taxElement = document.getElementById('checkoutTax');
-        const totalElement = document.getElementById('checkoutTotal');
-
-        // Populate items
-        itemsContainer.innerHTML = this.cartItems.map(item => `
-            <div class="checkout-item">
-                <img src="${item.image_url || '/images/placeholder-furniture.svg'}" alt="${item.name}">
-                <div class="item-details">
-                    <span class="item-name">${item.name}</span>
-                    <span class="item-quantity">Qty: ${item.quantity}</span>
-                </div>
-                <span class="item-total">$${(parseFloat(item.price) * parseInt(item.quantity)).toFixed(2)}</span>
-            </div>
-        `).join('');
-
-        // Calculate totals
-        const subtotal = this.cartTotal;
-        const shipping = subtotal > 100 ? 0 : 19.99; // Free shipping over $100
-        const tax = subtotal * 0.08; // 8% tax
-        const total = subtotal + shipping + tax;
-
-        subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
-        shippingElement.textContent = shipping > 0 ? `$${shipping.toFixed(2)}` : 'FREE';
-        taxElement.textContent = `$${tax.toFixed(2)}`;
-        totalElement.textContent = `$${total.toFixed(2)}`;
+        // Remove this method or make it empty since we're not using order summary anymore
+        console.log('Checkout summary update skipped - order summary removed');
     }
 }
 

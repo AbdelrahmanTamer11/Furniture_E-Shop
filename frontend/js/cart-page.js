@@ -29,6 +29,11 @@ class CartPageManager {
         const cartItemsList = document.getElementById('cartItemsList');
         const emptyCart = document.getElementById('emptyCart');
 
+        if (!cartItemsList || !emptyCart) {
+            console.error('Required cart elements not found');
+            return;
+        }
+
         if (this.cart.length === 0) {
             cartItemsList.style.display = 'none';
             emptyCart.style.display = 'block';
@@ -117,19 +122,27 @@ class CartPageManager {
         const tax = subtotal * this.taxRate;
         const total = subtotal + shipping + tax;
 
-        document.getElementById('subtotalAmount').textContent = `$${subtotal.toFixed(2)}`;
-        document.getElementById('shippingAmount').textContent = shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`;
-        document.getElementById('taxAmount').textContent = `$${tax.toFixed(2)}`;
-        document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
+        // Safely update elements if they exist
+        const subtotalEl = document.getElementById('subtotalAmount');
+        const shippingEl = document.getElementById('shippingAmount');
+        const taxEl = document.getElementById('taxAmount');
+        const totalEl = document.getElementById('totalAmount');
+
+        if (subtotalEl) subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
+        if (shippingEl) shippingEl.textContent = shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`;
+        if (taxEl) taxEl.textContent = `$${tax.toFixed(2)}`;
+        if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
 
         // Update checkout button state
         const checkoutBtn = document.querySelector('.checkout-btn');
-        if (total > this.userBalance) {
-            checkoutBtn.disabled = true;
-            checkoutBtn.textContent = 'INSUFFICIENT BALANCE';
-        } else {
-            checkoutBtn.disabled = false;
-            checkoutBtn.textContent = 'CHECKOUT';
+        if (checkoutBtn) {
+            if (total > this.userBalance) {
+                checkoutBtn.disabled = true;
+                checkoutBtn.textContent = 'INSUFFICIENT BALANCE';
+            } else {
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'CHECKOUT';
+            }
         }
     }
 
