@@ -96,6 +96,11 @@ try {
         // Use the new method that fetches fresh balance
         $cartData = $cart->getCartWithBalance($userId);
         
+        // CRITICAL FIX: Force fresh balance fetch
+        $freshBalance = $cart->getUserBalance($userId);
+        $cartData['balance'] = $freshBalance;
+        
+        error_log("Cart GET - Fresh balance fetched: $freshBalance");
         error_log("Cart GET - Dynamic data: " . json_encode($cartData));
         
         $response = array_merge(['success' => true], $cartData);
@@ -169,14 +174,21 @@ try {
             $success = $cart->removeItem($userId, $productId);
             
             if ($success) {
-                // Get fresh cart data with updated balance
-                $cartData = $cart->getCartWithBalance($userId);
+                $cartItems = $cart->getCartItems($userId);
+                $cartTotal = $cart->getCartTotal($userId);
+                $cartCount = $cart->getCartCount($userId);
+                $userBalance = $cart->getUserBalance($userId);
                 
-                $response = array_merge([
+                error_log("Cart DELETE - Fetched balance: $userBalance for user: $userId");
+                
+                $response = [
                     'success' => true, 
-                    'message' => 'Item removed from cart'
-                ], $cartData);
-                
+                    'message' => 'Item removed from cart',
+                    'items' => $cartItems,
+                    'total' => floatval($cartTotal),
+                    'count' => intval($cartCount),
+                    'balance' => floatval($userBalance)
+                ];
                 http_response_code(200);
                 echo json_encode($response);
             } else {
@@ -198,18 +210,6 @@ try {
     echo json_encode(['error' => 'Internal server error: ' . $e->getMessage()]);
 }
 ?>
-            exit;
-        }
-    }
-    
-    if ($method === 'DELETE') {
-        $productId = $_GET['product_id'] ?? 0;
-        
-        if ($productId) {
-            $success = $cart->removeItem($userId, $productId);
-            
-            if ($success) {
-                $cartItems = $cart->getCartItems($userId);
                 $cartTotal = $cart->getCartTotal($userId);
                 $cartCount = $cart->getCartCount($userId);
                 $userBalance = $cart->getUserBalance($userId);

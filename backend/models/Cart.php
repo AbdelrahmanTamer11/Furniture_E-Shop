@@ -99,8 +99,8 @@ class Cart {
     
     public function getUserBalance($userId) {
         try {
-            error_log("=== DYNAMIC BALANCE FETCH ===");
-            error_log("Fetching fresh balance for user ID: " . $userId);
+            error_log("=== FRESH BALANCE FETCH ===");
+            error_log("Fetching balance for user ID: " . $userId);
             
             // Ensure userId is an integer
             $userId = intval($userId);
@@ -110,25 +110,36 @@ class Cart {
                 return 0.0;
             }
             
-            // Force fresh data by clearing any potential cache
+            // Force fresh data by clearing any potential cache and using direct query
             $sql = "SELECT balance FROM users WHERE id = :user_id LIMIT 1";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':user_id' => $userId]);
+            
+            // Force fetch as associative array
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
             error_log("Fresh balance query result: " . print_r($result, true));
             
             if ($result && isset($result['balance'])) {
                 $balance = floatval($result['balance']);
-                error_log("Dynamic balance fetched: " . $balance);
+                error_log("Fresh balance fetched: " . $balance);
                 return $balance;
             } else {
-                error_log("No balance found for user");
+                error_log("No balance found for user ID: " . $userId);
+                
+                // Double check - maybe user exists but balance is null
+                $sql2 = "SELECT id, username, balance FROM users WHERE id = :user_id";
+                $stmt2 = $this->db->prepare($sql2);
+                $stmt2->execute([':user_id' => $userId]);
+                $user = $stmt2->fetch(PDO::FETCH_ASSOC);
+                error_log("User data check: " . print_r($user, true));
+                
                 return 0.0;
             }
             
         } catch (Exception $e) {
-            error_log("Error fetching dynamic balance: " . $e->getMessage());
+            error_log("Error fetching balance: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             return 0.0;
         }
     }
@@ -140,12 +151,24 @@ class Cart {
         $cartCount = $this->getCartCount($userId);
         $userBalance = $this->getUserBalance($userId); // Always fetch fresh
         
+        error_log("=== CART WITH BALANCE ===");
+        error_log("User ID: $userId");
+        error_log("Cart items: " . count($cartItems));
+        error_log("Cart total: $cartTotal");
+        error_log("Cart count: $cartCount");
+        error_log("User balance: $userBalance");
+        
         return [
             'items' => $cartItems,
             'total' => floatval($cartTotal),
             'count' => intval($cartCount),
             'balance' => floatval($userBalance),
-            'timestamp' => time()
+            'timestamp' => time(),
+            'debug' => [
+                'user_id' => $userId,
+                'balance_type' => gettype($userBalance),
+                'balance_value' => $userBalance
+            ]
         ];
     }
 }

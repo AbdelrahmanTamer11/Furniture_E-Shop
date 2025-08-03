@@ -88,6 +88,8 @@ class CartManager {
                 this.cartItems = data.items || [];
                 this.cartTotal = parseFloat(data.total || 0);
                 this.cartCount = parseInt(data.count || 0);
+
+                // CRITICAL FIX: Ensure balance is properly loaded
                 this.userBalance = parseFloat(data.balance || 0);
 
                 console.log('=== PARSED VALUES ===');
@@ -96,6 +98,12 @@ class CartManager {
                 console.log('cartCount:', this.cartCount);
                 console.log('userBalance:', this.userBalance);
                 console.log('userBalance type:', typeof this.userBalance);
+
+                // FORCE BALANCE REFRESH if it's still 0
+                if (this.userBalance === 0 && app.currentUser) {
+                    console.log('Balance is 0, forcing refresh...');
+                    await this.refreshUserBalance();
+                }
 
                 if (data.debug) {
                     console.log('=== DEBUG INFO ===', data.debug);
@@ -112,6 +120,40 @@ class CartManager {
         }
 
         console.log('=== LOAD CART END ===');
+    }
+
+    // Add new method to force balance refresh
+    async refreshUserBalance() {
+        try {
+            console.log('=== REFRESHING USER BALANCE ===');
+            const token = localStorage.getItem('auth_token');
+
+            const response = await fetch(`${this.API_BASE}/balance.php`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Balance refresh response:', data);
+
+                if (data.balance !== undefined) {
+                    this.userBalance = parseFloat(data.balance);
+                    console.log('Balance refreshed to:', this.userBalance);
+
+                    // Update UI immediately
+                    this.updateBalanceDisplay();
+                    this.updateCheckoutButton();
+                }
+            } else {
+                console.error('Balance refresh failed:', response.status);
+            }
+        } catch (error) {
+            console.error('Error refreshing balance:', error);
+        }
     }
 
     loadGuestCart() {
@@ -737,7 +779,9 @@ class CartManager {
         document.body.appendChild(modal);
     }
 
-    startCheckout() {
+    async startCheckout() {
+        console.log('=== START CHECKOUT ===');
+
         if (!app.currentUser) {
             app.showAlert('Please login to checkout', 'warning');
             toggleAuth();
@@ -749,8 +793,280 @@ class CartManager {
             return;
         }
 
+        // FORCE BALANCE CHECK before checkout
+        console.log('Current balance before checkout:', this.userBalance);
+
+        // Refresh balance one more time to be sure
+        await this.refreshUserBalance();
+
+        // Check balance after refresh
+        const userBalance = parseFloat(this.userBalance || 0);
+        const cartTotal = parseFloat(this.cartTotal || 0);
+
+        console.log('Balance check after refresh:', { userBalance, cartTotal });
+
+        if (userBalance < cartTotal) {
+            console.log('Insufficient balance detected');
+            this.showInsufficientBalanceModal();
+            return;
+        }
+
+        console.log('Balance sufficient, proceeding to checkout');
         this.populateCheckoutForm();
         document.getElementById('checkoutModal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    showInsufficientBalanceModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal show';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Insufficient Balance</h3>
+                    <button class="close-modal" onclick="this.parentElement.parentElement.parentElement.remove(); document.body.style.overflow = '';">×</button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="warning-icon">⚠️</div>
+                    <h3 style="color: #e74c3c; margin: 1rem 0;">Insufficient Balance</h3>
+                    <div class="balance-details">
+                        <div class="balance-row">
+                            <span>Cart Total:</span>
+                            <span class="amount">$${this.cartTotal.toFixed(2)}</span>
+                        </div>
+                        <div class="balance-row">
+                            <span>Your Balance:</span>
+                            <span class="amount">$${this.userBalance.toFixed(2)}</span>
+                        </div>
+                        <div class="balance-row shortage">
+                            <span>Shortage:</span>
+                            <span class="amount">$${(this.cartTotal - this.userBalance).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <p style="color: #666; margin: 1rem 0;">You need to add more funds to your account or remove some items from your cart.</p>
+                    <div class="modal-actions">
+                        <button class="btn-secondary" onclick="this.parentElement.parentElement.parentElement.parentElement.remove(); document.body.style.overflow = '';">
+                            Continue Shopping
+                        </button>
+                        <button class="btn-primary" onclick="this.parentElement.parentElement.parentElement.parentElement.remove(); document.body.style.overflow = ''; cartManager.closeCart();">
+                            Remove Items
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+    }
+
+    async processPayment() {
+        console.log('=== PROCESS PAYMENT ===');
+
+        // Validate form
+        const form = document.getElementById('checkoutForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // Show loading state
+        const placeOrderBtn = document.querySelector('#checkoutModal .btn-primary');
+        const originalText = placeOrderBtn.textContent;
+        placeOrderBtn.textContent = 'Processing Payment...';
+        placeOrderBtn.disabled = true;
+
+        try {
+            // Collect form data
+            const shippingAddress = {
+                first_name: document.getElementById('firstName').value,
+                last_name: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                zip_code: document.getElementById('zipCode').value
+            };
+
+            const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+            console.log('Checkout data:', { shippingAddress, paymentMethod });
+
+            // Make checkout API call
+            const token = localStorage.getItem('auth_token');
+            const response = await fetch(`${this.API_BASE}/checkout.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    shipping_address: shippingAddress,
+                    billing_address: shippingAddress, // Same as shipping for now
+                    payment_method: paymentMethod
+                })
+            });
+
+            console.log('Checkout API response status:', response.status);
+            const result = await response.json();
+            console.log('Checkout API result:', result);
+
+            if (response.ok && result.success) {
+                // Success - show confirmation
+                this.showOrderSuccess(result);
+
+                // Update balance in cart manager
+                this.userBalance = result.new_balance;
+
+                // Reload cart data
+                await this.loadCart();
+
+                // Close checkout modal
+                this.closeCheckout();
+
+            } else {
+                // Handle errors
+                let errorMessage = result.error || 'Payment failed';
+
+                if (result.shortage) {
+                    errorMessage = `Insufficient balance. You need $${result.shortage.toFixed(2)} more.`;
+                }
+
+                this.showAlert(errorMessage, 'error');
+            }
+
+        } catch (error) {
+            console.error('Checkout error:', error);
+            this.showAlert('Network error. Please try again.', 'error');
+        } finally {
+            // Reset button
+            placeOrderBtn.textContent = originalText;
+            placeOrderBtn.disabled = false;
+        }
+    }
+
+    showOrderSuccess(orderData) {
+        const modal = document.createElement('div');
+        modal.className = 'modal show';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="success-animation">
+                        <div class="success-icon">✓</div>
+                    </div>
+                    <h2 style="color: #28a745; margin: 1rem 0;">Order Confirmed!</h2>
+                    <p style="color: #666; font-size: 1.1rem;">Thank you for your purchase!</p>
+                    
+                    <div class="order-summary">
+                        <div class="order-detail">
+                            <strong>Order Number:</strong> ${orderData.order_number}
+                        </div>
+                        <div class="order-detail">
+                            <strong>Total Paid:</strong> $${orderData.total.toFixed(2)}
+                        </div>
+                        <div class="order-detail">
+                            <strong>New Balance:</strong> $${orderData.new_balance.toFixed(2)}
+                        </div>
+                        <div class="order-detail">
+                            <strong>Estimated Delivery:</strong> 3-5 business days
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 2rem;">
+                        <button class="btn-primary" onclick="this.parentElement.parentElement.parentElement.remove(); document.body.style.overflow = '';">
+                            Continue Shopping
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Auto-remove after 15 seconds
+        setTimeout(() => {
+            if (modal.parentNode) {
+                modal.remove();
+                document.body.style.overflow = '';
+            }
+        }, 15000);
+    }
+
+    showAlert(message, type = 'info') {
+        // Remove existing alerts
+        const existingAlert = document.querySelector('.checkout-alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+
+        const alert = document.createElement('div');
+        alert.className = `checkout-alert alert-${type}`;
+        alert.innerHTML = `
+            <div class="alert-content">
+                <span class="alert-icon">${type === 'success' ? '✓' : type === 'error' ? '⚠' : 'ℹ'}</span>
+                <span class="alert-message">${message}</span>
+                <button class="alert-close" onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+
+        document.body.appendChild(alert);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+
+    closeCheckout() {
+        const modal = document.getElementById('checkoutModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        document.body.style.overflow = '';
+    }
+
+    setupCartPersistence() {
+        // Merge guest cart with user cart when user logs in
+        window.addEventListener('user-login', () => {
+            this.mergeGuestCart();
+        });
+    }
+
+    async mergeGuestCart() {
+        const guestCart = localStorage.getItem('guest_cart');
+        if (!guestCart || !app.currentUser) return;
+
+        try {
+            const guestItems = JSON.parse(guestCart);
+
+            // Add each guest cart item to user cart
+            for (const item of guestItems) {
+                await this.addToCart(item.id, item.quantity);
+            }
+
+            // Clear guest cart
+            localStorage.removeItem('guest_cart');
+
+        } catch (error) {
+            console.error('Failed to merge guest cart:', error);
+        }
+    }
+
+    // Add this method to better detect if user is logged in
+    isUserLoggedIn() {
+        // Check multiple authentication indicators
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('authToken');
+        const authBtn = document.getElementById('authBtn');
+
+        // Check if app instance shows user is logged in
+        const appLoggedIn = window.app && window.app.currentUser;
+
+        // Check if auth button shows logged in state (contains "Hi,")
+        const isDisplayLoggedIn = authBtn && authBtn.textContent.includes('Hi,');
+
+        return !!(token || appLoggedIn || isDisplayLoggedIn);
     }
 
     populateCheckoutForm() {
@@ -795,110 +1111,6 @@ class CartManager {
         taxElement.textContent = `$${tax.toFixed(2)}`;
         totalElement.textContent = `$${total.toFixed(2)}`;
     }
-
-    closeCheckout() {
-        document.getElementById('checkoutModal').classList.remove('show');
-    }
-
-    processPayment() {
-        // Validate form
-        const form = document.getElementById('checkoutForm');
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-
-        // Show loading state
-        const placeOrderBtn = document.querySelector('#checkoutModal .btn-primary');
-        placeOrderBtn.textContent = 'Processing...';
-        placeOrderBtn.disabled = true;
-
-        // Simulate payment processing
-        setTimeout(() => {
-            this.completeOrder();
-        }, 2000);
-    }
-
-    completeOrder() {
-        // Clear cart
-        this.clearCart();
-
-        // Close checkout
-        this.closeCheckout();
-
-        // Show success message
-        this.showOrderConfirmation();
-    }
-
-    showOrderConfirmation() {
-        const modal = document.createElement('div');
-        modal.className = 'modal show';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <div class="modal-body text-center">
-                    <div class="success-icon">✓</div>
-                    <h2>Order Confirmed!</h2>
-                    <p>Thank you for your purchase. Your order has been received and will be processed shortly.</p>
-                    <div class="order-details">
-                        <p><strong>Order Number:</strong> #${Date.now()}</p>
-                        <p><strong>Estimated Delivery:</strong> 3-5 business days</p>
-                    </div>
-                    <button class="btn-primary" onclick="this.parentElement.parentElement.parentElement.remove()">
-                        Continue Shopping
-                    </button>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        // Auto-remove after 10 seconds
-        setTimeout(() => {
-            modal.remove();
-        }, 10000);
-    }
-
-    setupCartPersistence() {
-        // Merge guest cart with user cart when user logs in
-        window.addEventListener('user-login', () => {
-            this.mergeGuestCart();
-        });
-    }
-
-    async mergeGuestCart() {
-        const guestCart = localStorage.getItem('guest_cart');
-        if (!guestCart || !app.currentUser) return;
-
-        try {
-            const guestItems = JSON.parse(guestCart);
-
-            // Add each guest cart item to user cart
-            for (const item of guestItems) {
-                await this.addToCart(item.id, item.quantity);
-            }
-
-            // Clear guest cart
-            localStorage.removeItem('guest_cart');
-
-        } catch (error) {
-            console.error('Failed to merge guest cart:', error);
-        }
-    }
-
-    // Add this method to better detect if user is logged in
-    isUserLoggedIn() {
-        // Check multiple authentication indicators
-        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('authToken');
-        const authBtn = document.getElementById('authBtn');
-
-        // Check if app instance shows user is logged in
-        const appLoggedIn = window.app && window.app.currentUser;
-
-        // Check if auth button shows logged in state (contains "Hi,")
-        const isDisplayLoggedIn = authBtn && authBtn.textContent.includes('Hi,');
-
-        return !!(token || appLoggedIn || isDisplayLoggedIn);
-    }
 }
 
 // Initialize cart manager
@@ -906,16 +1118,37 @@ const cartManager = new CartManager();
 
 // Global functions for HTML handlers
 function toggleCart() {
-    cartManager.openCart();
+    if (window.cartManager) {
+        window.cartManager.openCart();
+    }
 }
 
 function checkout() {
-    if (!app.currentUser) {
-        app.showAlert('Please login to checkout', 'warning');
+    console.log('=== CHECKOUT FUNCTION CALLED ===');
+    console.log('CartManager exists:', !!window.cartManager);
+    console.log('Current user:', window.app?.currentUser);
+
+    if (!window.app?.currentUser) {
+        console.log('User not logged in');
+        window.app.showAlert('Please login to checkout', 'warning');
         toggleAuth();
         return;
     }
-    cartManager.checkout();
+
+    if (!window.cartManager) {
+        console.error('CartManager not available');
+        window.app.showAlert('Cart system not available. Please refresh the page.', 'error');
+        return;
+    }
+
+    if (window.cartManager.cartItems.length === 0) {
+        console.log('Cart is empty');
+        window.app.showAlert('Your cart is empty', 'warning');
+        return;
+    }
+
+    console.log('Starting checkout process...');
+    window.cartManager.startCheckout();
 }
 
 // Export for global access

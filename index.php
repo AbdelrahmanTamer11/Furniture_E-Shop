@@ -77,7 +77,54 @@ if ($cleanPath !== '/' && file_exists($frontendFile) && !is_dir($frontendFile)) 
     exit;
 }
 
-// Default: serve main page
-error_log("Serving main page for path: " . $cleanPath);
-include __DIR__ . '/frontend/index.html';
+// Default: serve main page with horizontal footer
+$indexContent = file_get_contents(__DIR__ . '/frontend/index.html');
+
+// Update the hero buttons to include navigation functionality
+$heroButtonsReplacement = '
+                <div class="hero-buttons">
+                    <a href="#ai-assistant" class="btn-primary" onclick="scrollToAIAssistant()">Try AI Design</a>
+                    <a href="#products" class="btn-secondary">Browse Furniture</a>
+                </div>';
+
+// Replace hero buttons if they exist
+$indexContent = preg_replace('/<div class="hero-buttons">.*?<\/div>/s', $heroButtonsReplacement, $indexContent);
+
+// Update footer section to be horizontal
+$footerReplacement = '
+    <footer id="contact">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h2>FurniVision</h2>
+                <p>Transforming spaces with AI-powered furniture design.</p>
+            </div>
+            
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="#ai-assistant">AI Design</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-contact">
+                <h3>Contact</h3>
+                <div class="contact-info">
+                    <div class="contact-item">Email: abdelrahman_tamer@furnivision.com</div>
+                    <div class="contact-item">Phone: 01003234615</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 FurniVision. All rights reserved.</p>
+        </div>
+    </footer>';
+
+// Replace the existing footer
+$indexContent = preg_replace('/<footer[^>]*>.*?<\/footer>/s', $footerReplacement, $indexContent);
+
+echo $indexContent;
 ?>

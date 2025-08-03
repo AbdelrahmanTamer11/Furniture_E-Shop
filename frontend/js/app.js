@@ -472,19 +472,25 @@ class FurnitureApp {
                 console.log('App loadCart response:', data);
 
                 this.cartItems = data.items || [];
+                // CRITICAL FIX: Ensure balance is properly set in app
                 this.userBalance = parseFloat(data.balance || 0);
 
                 console.log('App - Set userBalance to:', this.userBalance);
 
                 this.updateCartUI();
 
-                // Also update CartManager if it exists
+                // Also update CartManager if it exists - FORCE BALANCE UPDATE
                 if (window.cartManager) {
                     window.cartManager.userBalance = this.userBalance;
                     window.cartManager.cartItems = this.cartItems;
                     window.cartManager.cartTotal = parseFloat(data.total || 0);
                     window.cartManager.cartCount = parseInt(data.count || 0);
+
+                    console.log('Updating CartManager with balance:', this.userBalance);
                     window.cartManager.updateCartUI();
+
+                    // Force balance display update
+                    window.cartManager.updateBalanceDisplay();
                 }
             } else {
                 console.error('App loadCart failed:', response.status);
@@ -782,19 +788,53 @@ function scrollToContact() {
     });
 }
 
-function checkout() {
-    if (!app.currentUser) {
-        app.showAlert('Please login to checkout', 'warning');
-        toggleAuth();
-        return;
+function scrollToAIAssistant() {
+    const aiSection = document.getElementById('ai-assistant');
+    if (aiSection) {
+        aiSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
     }
+}
 
-    if (app.cartItems.length === 0) {
-        app.showAlert('Your cart is empty', 'warning');
-        return;
+// Enhanced navigation with active states
+document.addEventListener('DOMContentLoaded', function () {
+    // Handle all navigation links with smooth scrolling
+    const navLinks = document.querySelectorAll('a[href^="#"]');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            const targetId = href.substring(1);
+            const targetElement = document.getElementById(targetId);
+
+            if (targetElement) {
+                e.preventDefault();
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+
+                // Update active states
+                updateActiveNavigation(targetId);
+            }
+        });
+    });
+});
+
+function updateActiveNavigation(activeId) {
+    // Remove active class from all nav links
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+
+    // Add active class to current nav link
+    const activeLink = document.querySelector(`.nav-link[href="#${activeId}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
     }
-
-    app.showAlert('Checkout functionality coming soon!', 'info');
 }
 
 // SINGLE GLOBAL ADD TO CART HANDLER
@@ -832,6 +872,22 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof CartManager !== 'undefined') {
         window.cartManager = new CartManager();
         console.log('CartManager initialized');
+
+        // Ensure checkout modal is created
+        if (window.cartManager.setupCheckout) {
+            window.cartManager.setupCheckout();
+            console.log('Checkout setup completed');
+        }
+
+        // FORCE BALANCE SYNC after initialization
+        setTimeout(() => {
+            if (window.app && window.app.currentUser && window.app.userBalance) {
+                console.log('Syncing balance from app to cartManager:', window.app.userBalance);
+                window.cartManager.userBalance = window.app.userBalance;
+                window.cartManager.updateBalanceDisplay();
+                window.cartManager.updateCheckoutButton();
+            }
+        }, 1000);
     }
 
     if (typeof ProductManager !== 'undefined') {
@@ -848,3 +904,4 @@ window.testAuth = function () {
     console.log('Auth token:', localStorage.getItem('auth_token'));
     return window.app ? !!window.app.currentUser : false;
 };
+

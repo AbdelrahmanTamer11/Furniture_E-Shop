@@ -20,7 +20,7 @@
             <ul class="nav-menu">
                 <li><a href="#home" class="nav-link">Home</a></li>
                 <li><a href="#products" class="nav-link">Products</a></li>
-                <li><a href="#ai-design" class="nav-link">AI Design</a></li>
+                <li><a href="#ai-assistant" class="nav-link" onclick="scrollToAIAssistant()">AI Design</a></li>
                 <li><a href="#about" class="nav-link" onclick="scrollToAbout()">About</a></li>
                 <li><a href="#contact" class="nav-link" onclick="scrollToContact()">Contact</a></li>
             </ul>
@@ -46,8 +46,8 @@
             <p>Upload a photo of your room and let our AI suggest the perfect furniture set that matches your style and
                 space.</p>
             <div class="hero-buttons">
-                <button class="btn-primary" onclick="openAIDesign()">Try AI Design</button>
-                <button class="btn-secondary" onclick="scrollToProducts()">Browse Furniture</button>
+                <a href="#ai-assistant" class="btn-primary" onclick="scrollToAIAssistant()">Try AI Design</a>
+                <a href="#products" class="btn-secondary">Browse Furniture</a>
             </div>
         </div>
         <div class="hero-image">
@@ -103,37 +103,64 @@
         </div>
     </section>
 
-    <!-- AI Design Section -->
-    <section id="ai-design" class="ai-design-section">
-        <div class="container">
-            <h2>AI Room Design Assistant 🤖</h2>
-            <p>Upload a photo of your room and let our AI create the perfect furniture arrangement for you.</p>
+    <!-- AI Room Design Assistant Section -->
+    <section class="ai-assistant-section" id="ai-assistant">
+        <div class="ai-assistant-container">
+            <!-- Title Card -->
+            <div class="ai-title-card">
+                <h2 class="ai-assistant-title">
+                    <span class="ai-icon">🤖</span>
+                    AI Room Design Assistant
+                </h2>
+                <p class="ai-assistant-description">
+                    Upload a photo of your room and let our AI create the perfect furniture arrangement for you. Get
+                    personalized recommendations based on your style preferences.
+                </p>
+            </div>
 
-            <div class="ai-upload-area">
-                <div class="upload-zone" id="uploadZone">
+            <!-- Upload Card -->
+            <div class="ai-upload-card">
+                <h3 class="upload-card-title">
+                    📷 Upload Your Room Photo
+                </h3>
+                <div class="upload-area" id="uploadZone">
                     <div class="upload-content">
-                        <div class="upload-icon">📸</div>
-                        <h3>Upload Your Room Photo</h3>
-                        <p>Drag and drop or click to select an image</p>
-                        <small>Supports JPG, PNG, WebP (max 5MB)</small>
+                        <div class="upload-icon">🏠</div>
+                        <div class="upload-text">Select or Drop Your Image</div>
+                        <div class="upload-subtext">Drag and drop or click to browse</div>
+                        <div class="upload-subtext">Supports JPG, PNG, WebP (max 5MB)</div>
+                        <button type="button" class="upload-btn" id="uploadButton">Choose File</button>
                     </div>
-                    <input type="file" id="roomImageInput" accept="image/*" style="display: none;">
                 </div>
+                <input type="file" id="roomPhoto" class="file-input" accept="image/*">
+            </div>
 
+            <!-- Image Preview Card -->
+            <div class="image-preview-card" id="imagePreview">
+                <h3 class="preview-card-title">📸 Room Preview</h3>
+                <img id="previewImg" class="preview-img" alt="Room preview">
+            </div>
+
+            <!-- Options Card -->
+            <div class="ai-options-card">
+                <h3 class="options-card-title">
+                    ⚙️ Customize Your Analysis
+                </h3>
                 <div class="ai-options">
                     <div class="option-group">
-                        <label for="roomType">Room Type:</label>
-                        <select id="roomType">
+                        <label class="option-label" for="roomType">🏡 Room Type:</label>
+                        <select id="roomType" class="option-select">
                             <option value="living_room">Living Room</option>
                             <option value="bedroom">Bedroom</option>
                             <option value="dining_room">Dining Room</option>
-                            <option value="office">Home Office</option>
+                            <option value="office">Office</option>
                             <option value="kitchen">Kitchen</option>
                         </select>
                     </div>
+
                     <div class="option-group">
-                        <label for="stylePreference">Preferred Style:</label>
-                        <select id="stylePreference">
+                        <label class="option-label" for="preferredStyle">🎨 Style:</label>
+                        <select id="preferredStyle" class="option-select">
                             <option value="Modern">Modern</option>
                             <option value="Scandinavian">Scandinavian</option>
                             <option value="Classic">Classic</option>
@@ -142,20 +169,23 @@
                         </select>
                     </div>
                 </div>
+            </div>
 
-                <button class="btn-primary" id="analyzeBtn" onclick="analyzeRoom()">
-                    <span class="btn-text">Analyze Room</span>
-                    <span class="loading-spinner" style="display: none;">⏳</span>
+            <!-- Analyze Button Card -->
+            <div class="ai-analyze-card">
+                <button class="analyze-btn" id="analyzeRoom" onclick="analyzeRoom()">
+                    <span class="btn-text">🚀 Analyze Room</span>
+                    <div class="loading-spinner" style="display: none;">⏳</div>
                 </button>
-            </div> <!-- AI Results -->
-            <div class="ai-results" id="aiResults" style="display: none;">
-                <h3>AI Furniture Suggestions</h3>
-                <div class="suggestions-grid" id="suggestionsGrid">
-                    <!-- AI suggestions will be displayed here -->
-                </div>
-                <div class="total-cost">
-                    <h4>Total Estimated Cost: $<span id="totalCost">0</span></h4>
-                    <button class="btn-primary" onclick="addAllToCart()">Add All to Cart</button>
+            </div>
+
+            <!-- Results Card -->
+            <div class="ai-results-card" id="aiResults">
+                <h3 class="results-title">
+                    ✨ AI Analysis Results
+                </h3>
+                <div class="results-content" id="resultsContent">
+                    <!-- AI results will be displayed here -->
                 </div>
             </div>
         </div>
@@ -275,11 +305,10 @@
         </div>
     </footer>
 
-    <script src="js/app.js"></script>
+    <script src="js/ai-assistant.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/cart.js"></script>
-    <script src="js/products.js"></script>
-    <script src="js/ai-design.js"></script>
+    <script src="js/app.js"></script>
 </body>
 
 </html>

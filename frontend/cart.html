@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - FurniVision</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cart-page.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>FurniVision</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="#products" class="nav-link">Products</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="cart-btn" onclick="window.location.href='cart.html'">
+                    🛒
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+                <button class="auth-btn" onclick="openModal('loginModal')">Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cart Page Content -->
+    <div class="cart-page">
+        <div class="cart-container">
+            <!-- Page Header -->
+            <div class="cart-page-header">
+                <h1>Shopping Cart</h1>
+                <p>Review your items and proceed to checkout</p>
+            </div>
+
+            <!-- Cart Content -->
+            <div class="cart-content">
+                <!-- Cart Items Section -->
+                <div class="cart-items-section">
+                    <div class="cart-items-header">
+                        <h2>Your Items</h2>
+                        <button class="clear-cart-btn" onclick="clearCart()">Clear Cart</button>
+                    </div>
+
+                    <div class="cart-items-list" id="cartItemsList">
+                        <!-- Cart items will be populated here -->
+                    </div>
+
+                    <!-- Empty Cart State -->
+                    <div class="empty-cart" id="emptyCart" style="display: none;">
+                        <div class="empty-cart-icon">🛒</div>
+                        <h3>Your cart is empty</h3>
+                        <p>Add some beautiful furniture to get started</p>
+                        <a href="index.html" class="btn-primary">Continue Shopping</a>
+                    </div>
+                </div>
+
+                <!-- Cart Summary Section -->
+                <div class="cart-summary-section">
+                    <div class="cart-summary-card">
+                        <h2>Order Summary</h2>
+
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span>Subtotal:</span>
+                                <span id="subtotalAmount">$0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Shipping:</span>
+                                <span id="shippingAmount">$29.99</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Tax:</span>
+                                <span id="taxAmount">$0.00</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>Total:</span>
+                                <span id="totalAmount">$0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="balance-info">
+                            <span>Your Balance: <strong id="userBalance">$1212.17</strong></span>
+                        </div>
+
+                        <button class="checkout-btn" onclick="proceedToCheckout()">
+                            CHECKOUT
+                        </button>
+
+                        <div class="secure-checkout">
+                            <div class="secure-item">
+                                <span class="secure-icon">🔒</span>
+                                <span>Secure SSL Encryption</span>
+                            </div>
+                            <div class="secure-item">
+                                <span class="secure-icon">🛡️</span>
+                                <span>30-Day Return Policy</span>
+                            </div>
+                            <div class="secure-item">
+                                <span class="secure-icon">🚚</span>
+                                <span>Free Shipping on Orders $500+</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/cart-page.js"></script>
+</body>
+
+</html>
