@@ -92,8 +92,10 @@ class CartManager {
 
     closeCart() {
         const cartSidebar = document.getElementById('cartSidebar');
-        cartSidebar.classList.remove('open');
-        document.body.style.overflow = ''; // Restore scrolling
+        if (cartSidebar) {
+            cartSidebar.classList.remove('open');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
     }
 
     async loadCart() {

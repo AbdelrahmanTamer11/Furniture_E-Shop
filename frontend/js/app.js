@@ -779,6 +779,17 @@ function toggleCart() {
     }
 }
 
+function closeCart() {
+    if (window.cartManager) {
+        window.cartManager.closeCart();
+    } else {
+        // Fallback if cartManager not available
+        const cartSidebar = document.getElementById('cartSidebar');
+        cartSidebar.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+}
+
 function toggleAuth() {
     const authModal = document.getElementById('authModal');
     authModal.classList.toggle('show');
