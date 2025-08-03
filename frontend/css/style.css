@@ -2174,6 +2174,9 @@ footer a:hover {
 
 
 
+
+
+
 .total-header h3 {
     margin: 0 0 1rem 0;
     font-size: 1.5rem;
@@ -2223,4 +2226,212 @@ footer a:hover {
 /* Smooth scroll behavior for the entire page */
 html {
     scroll-behavior: smooth;
+}
+
+/* Remove old user dropdown styles and add hamburger menu styles */
+.user-dropdown {
+    display: none !important;
+    /* Hide old dropdown */
+}
+
+/* Hamburger Menu Styles */
+.user-hamburger-container {
+    position: relative;
+    display: inline-block;
+}
+
+.hamburger-menu {
+    background: linear-gradient(135deg, #cd853f, #deb887);
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 6px 20px rgba(139, 69, 19, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 45px;
+    height: 45px;
+    align-items: center;
+    justify-content: center;
+}
+
+.hamburger-menu:hover {
+    background: linear-gradient(135deg, #deb887, #f5deb3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 69, 19, 0.4);
+}
+
+.hamburger-line {
+    width: 20px;
+    height: 2px;
+    background: #2c1810;
+    border-radius: 1px;
+    transition: all 0.3s ease;
+}
+
+.hamburger-menu.active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-menu.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -6px);
+}
+
+.user-hamburger-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: linear-gradient(135deg, rgba(250, 248, 243, 0.98) 0%, rgba(232, 220, 192, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 15px;
+    box-shadow: 0 15px 40px rgba(139, 69, 19, 0.3);
+    min-width: 280px;
+    z-index: 1003;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(139, 69, 19, 0.2);
+    margin-top: 10px;
+}
+
+.user-hamburger-container.active .user-hamburger-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.user-hamburger-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(139, 69, 19, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, rgba(139, 69, 19, 0.1), rgba(205, 133, 63, 0.1));
+    border-radius: 15px 15px 0 0;
+}
+
+.user-avatar-large {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b4513, #cd853f);
+    color: #faf8f3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    font-weight: 700;
+    color: #2c1810;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.user-email {
+    color: #654321;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.user-hamburger-items {
+    padding: 1rem 0;
+}
+
+.hamburger-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    color: #2c1810;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
+}
+
+.hamburger-menu-item:hover {
+    background: rgba(139, 69, 19, 0.1);
+    color: #8b4513;
+    transform: translateX(5px);
+}
+
+.hamburger-menu-item i {
+    width: 20px;
+    text-align: center;
+    color: #8b4513;
+}
+
+.hamburger-menu-item.logout-item {
+    border-top: 1px solid rgba(139, 69, 19, 0.2);
+    margin-top: 0.5rem;
+    color: #dc2626;
+}
+
+.hamburger-menu-item.logout-item:hover {
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+}
+
+.hamburger-menu-item.logout-item i {
+    color: #dc2626;
+}
+
+/* Mobile responsive adjustments for hamburger menu */
+@media (max-width: 768px) {
+    .user-hamburger-menu {
+        right: -10px;
+        min-width: 260px;
+    }
+
+    .hamburger-menu {
+        width: 40px;
+        height: 40px;
+    }
+
+    .hamburger-line {
+        width: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-hamburger-menu {
+        position: fixed;
+        top: 80px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        width: auto;
+    }
+
+    .user-hamburger-header {
+        padding: 1.25rem;
+    }
+
+    .user-avatar-large {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
 }

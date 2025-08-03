@@ -74,48 +74,8 @@ class FurnitureApp {
     }
 
     showUserMenu() {
-        // Create user menu dropdown
-        const existingMenu = document.querySelector('.user-menu');
-        if (existingMenu) {
-            existingMenu.remove();
-            return;
-        }
-
-        const menu = document.createElement('div');
-        menu.className = 'user-menu';
-        menu.innerHTML = `
-            <div class="user-menu-content">
-                <div class="user-info">
-                    <strong>${this.currentUser.first_name} ${this.currentUser.last_name}</strong>
-                    <small>${this.currentUser.email}</small>
-                </div>
-                <div class="menu-items">
-                    <a href="#" onclick="app.showProfile()">Profile</a>
-                    <a href="#" onclick="app.showOrderHistory()">Orders</a>
-                    <a href="#" onclick="app.logout()">Logout</a>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(menu);
-
-        // Position menu
-        const authBtn = document.getElementById('authBtn');
-        const rect = authBtn.getBoundingClientRect();
-        menu.style.position = 'fixed';
-        menu.style.top = rect.bottom + 10 + 'px';
-        menu.style.right = '20px';
-        menu.style.zIndex = '1003';
-
-        // Close menu when clicking outside
-        setTimeout(() => {
-            document.addEventListener('click', function closeMenu(e) {
-                if (!menu.contains(e.target) && !authBtn.contains(e.target)) {
-                    menu.remove();
-                    document.removeEventListener('click', closeMenu);
-                }
-            });
-        }, 100);
+        // Replace old user menu with hamburger toggle
+        toggleUserHamburger();
     }
 
     async logout() {
@@ -871,6 +831,46 @@ function handleAddToCart(productId) {
 // Initialize the application
 const app = new FurnitureApp();
 window.app = app;
+
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM loaded, app initialized');
+
+    // Initialize other managers after DOM is ready
+    if (typeof CartManager !== 'undefined') {
+        window.cartManager = new CartManager();
+        console.log('CartManager initialized');
+
+        // Ensure checkout modal is created
+        if (window.cartManager.setupCheckout) {
+            window.cartManager.setupCheckout();
+            console.log('Checkout setup completed');
+        }
+
+        // FORCE BALANCE SYNC after initialization
+        setTimeout(() => {
+            if (window.app && window.app.currentUser && window.app.userBalance) {
+                console.log('Syncing balance from app to cartManager:', window.app.userBalance);
+                window.cartManager.userBalance = window.app.userBalance;
+                window.cartManager.updateBalanceDisplay();
+                window.cartManager.updateCheckoutButton();
+            }
+        }, 1000);
+    }
+
+    if (typeof ProductManager !== 'undefined') {
+        window.productManager = new ProductManager();
+        console.log('ProductManager initialized');
+    }
+});
+
+// Test function
+window.testAuth = function () {
+    console.log('=== AUTH TEST ===');
+    console.log('App exists:', !!window.app);
+    console.log('Current user:', window.app ? window.app.currentUser : 'No app');
+    console.log('Auth token:', localStorage.getItem('auth_token'));
+    return window.app ? !!window.app.currentUser : false;
+};
 
 document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM loaded, app initialized');

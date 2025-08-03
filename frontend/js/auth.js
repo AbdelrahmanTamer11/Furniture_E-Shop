@@ -597,32 +597,32 @@ function showRegisterForm() {
 function displayUserInfo(user) {
     const authBtn = document.getElementById('authBtn');
     if (authBtn) {
-        // Get user initials for avatar
-        const initials = user.first_name.charAt(0).toUpperCase() + user.last_name.charAt(0).toUpperCase();
-
-        // Replace the login button with user dropdown
+        // Replace the login button with hamburger menu
         authBtn.outerHTML = `
-            <div class="user-dropdown">
-                <button class="user-info" onclick="toggleUserDropdown()">
-                    <div class="user-avatar">${initials}</div>
-                    <span>Hi, ${user.first_name}</span>
-                    <i class="fas fa-chevron-down"></i>
+            <div class="user-hamburger-container">
+                <button class="hamburger-menu" onclick="toggleUserHamburger()">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
                 </button>
-                <div class="user-dropdown-content" id="userDropdownContent">
-                    <div class="user-dropdown-header">
-                        <div class="user-name">${user.first_name} ${user.last_name}</div>
-                        <div class="user-email">${user.email}</div>
+                <div class="user-hamburger-menu" id="userHamburgerMenu">
+                    <div class="user-hamburger-header">
+                        <div class="user-avatar-large">${user.first_name.charAt(0).toUpperCase()}${user.last_name.charAt(0).toUpperCase()}</div>
+                        <div class="user-details">
+                            <div class="user-name">${user.first_name} ${user.last_name}</div>
+                            <div class="user-email">${user.email}</div>
+                        </div>
                     </div>
-                    <div class="user-dropdown-menu">
-                        <a href="#" class="user-dropdown-item" onclick="showProfile()">
+                    <div class="user-hamburger-items">
+                        <a href="#" class="hamburger-menu-item" onclick="showProfile()">
                             <i class="fas fa-user"></i>
                             <span>Profile</span>
                         </a>
-                        <a href="#" class="user-dropdown-item" onclick="showOrders()">
+                        <a href="#" class="hamburger-menu-item" onclick="showOrders()">
                             <i class="fas fa-shopping-bag"></i>
                             <span>Orders</span>
                         </a>
-                        <button class="user-dropdown-item logout" onclick="handleLogout()">
+                        <button class="hamburger-menu-item logout-item" onclick="handleLogout()">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Logout</span>
                         </button>
@@ -633,19 +633,29 @@ function displayUserInfo(user) {
     }
 }
 
-// Toggle user dropdown visibility
-function toggleUserDropdown() {
-    const dropdown = document.querySelector('.user-dropdown');
-    const dropdownContent = document.getElementById('userDropdownContent');
+// Toggle hamburger menu visibility
+function toggleUserHamburger() {
+    const hamburgerContainer = document.querySelector('.user-hamburger-container');
+    const hamburgerMenu = document.getElementById('userHamburgerMenu');
+    const hamburgerButton = document.querySelector('.hamburger-menu');
 
-    if (dropdown && dropdownContent) {
-        // Close all other dropdowns first
-        document.querySelectorAll('.user-dropdown.active').forEach(d => {
-            if (d !== dropdown) d.classList.remove('active');
-        });
+    if (hamburgerContainer && hamburgerMenu) {
+        // Toggle menu visibility
+        hamburgerContainer.classList.toggle('active');
+        hamburgerButton.classList.toggle('active');
 
-        // Toggle current dropdown
-        dropdown.classList.toggle('active');
+        // Close menu when clicking outside
+        if (hamburgerContainer.classList.contains('active')) {
+            setTimeout(() => {
+                document.addEventListener('click', function closeHamburgerMenu(e) {
+                    if (!hamburgerContainer.contains(e.target)) {
+                        hamburgerContainer.classList.remove('active');
+                        hamburgerButton.classList.remove('active');
+                        document.removeEventListener('click', closeHamburgerMenu);
+                    }
+                });
+            }, 100);
+        }
     }
 }
 
@@ -677,9 +687,9 @@ function handleLogout() {
         sessionStorage.removeItem('user');
 
         // Reset UI to login state
-        const userDropdown = document.querySelector('.user-dropdown');
-        if (userDropdown) {
-            userDropdown.outerHTML = `
+        const userHamburgerContainer = document.querySelector('.user-hamburger-container');
+        if (userHamburgerContainer) {
+            userHamburgerContainer.outerHTML = `
                 <button class="auth-btn" id="authBtn" onclick="toggleAuth()">Login</button>
             `;
         }
