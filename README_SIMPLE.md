@@ -1,53 +1,53 @@
-# FurniVision - AI-Enhanced Furniture E-Commerce Platform
+# FurniVision - AI Furniture E-Shop
 
-A comprehensive furniture e-commerce platform that combines traditional online shopping with AI-powered room analysis and furniture recommendations using Google Gemini Vision API.
+AI-powered furniture e-commerce platform with room analysis and personalized recommendations.
 
-## 🎯 Project Overview
+## ✨ Features
 
-FurniVision revolutionizes furniture shopping by allowing users to upload photos of their rooms and receive personalized AI-generated furniture suggestions. The platform matches AI recommendations with actual inventory and provides seamless shopping experience.
+- **AI Room Analysis** - Upload photos, get furniture suggestions
+- **Smart Matching** - AI recommendations matched with real inventory
+- **Full E-Commerce** - Cart, accounts, checkout system
+- **Responsive Design** - Works on all devices
 
-### Key Features
-- **AI Room Analysis**: Upload room photos for personalized furniture suggestions
-- **Smart Product Matching**: AI suggestions matched with real inventory
-- **Complete E-Commerce**: Full shopping cart, user accounts, and checkout
-- **Responsive Design**: Optimized for all devices
-- **Modern UI/UX**: Clean, intuitive interface
+## 🛠️ Tech Stack
 
-## 🛠️ Technology Stack
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Backend**: PHP 7.4+, MySQL 8.0+
+- **AI**: Google Gemini Vision API
 
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Backend**: PHP 7.4+, RESTful APIs
-- **Database**: MySQL 8.0+
-- **AI Integration**: Google Gemini Vision API
-- **Authentication**: JWT-based sessions
+## 🚀 Quick Setup
 
-## 🚀 Quick Start
-
-1. **Clone the repository**
+1. **Clone & Setup**
    ```bash
    git clone https://github.com/AbdelrahmanTamer11/Furniture_E-Shop.git
    cd Furniture_E-Shop
    ```
 
-2. **Set up the database**
+2. **Database**
    ```sql
    CREATE DATABASE furniture_eshop;
    mysql -u root -p furniture_eshop < database/schema.sql
    ```
 
-3. **Configure the application**
+3. **Configure**
    ```php
    // Edit backend/config/config.php
-   define('DB_HOST', 'localhost');
-   define('DB_NAME', 'furniture_eshop');
-   define('DB_USER', 'your_username');
-   define('DB_PASS', 'your_password');
-   define('GEMINI_API_KEY', 'your_gemini_api_key');
+   define('GEMINI_API_KEY', 'your_api_key_here');
    ```
 
-4. **Start the development server**
+4. **Run**
    ```bash
-   cd frontend
+   php -S localhost:8000 index.php
+   ```
+
+## 📞 Contact
+
+**Abdelrahman Tamer**  
+GitHub: [@AbdelrahmanTamer11](https://github.com/AbdelrahmanTamer11)
+
+---
+
+Built with ❤️ for modern furniture shopping
    php -S localhost:8000
    ```
 

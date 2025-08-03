@@ -1,53 +1,53 @@
 #!/bin/bash
 
-# FurniVision Setup Script
-# This script helps set up the development environment
+echo "🏠 FurniVision Setup"
+echo "==================="
 
-echo "🏠 FurniVision Setup Script"
-echo "=========================="
-
-# Check for required tools
-check_requirement() {
+# Check requirements
+check_tool() {
     if ! command -v $1 &> /dev/null; then
-        echo "❌ $1 is not installed. Please install $1 first."
+        echo "❌ $1 not found. Please install $1"
         exit 1
-    else
-        echo "✅ $1 is available"
     fi
+    echo "✅ $1 found"
 }
 
 echo "Checking requirements..."
-check_requirement "php"
-check_requirement "mysql"
+check_tool "php"
+check_tool "mysql"
 
-# Create uploads directory if it doesn't exist
-echo "Creating directories..."
-mkdir -p backend/uploads
+# Create directories
+echo "Setting up directories..."
+mkdir -p backend/uploads frontend/images/products
 chmod 755 backend/uploads
-echo "✅ Upload directory created"
+echo "✅ Directories created"
 
-# Create placeholder images directory
-mkdir -p frontend/images/products
-echo "✅ Images directory created"
-
-# Check if database exists
-echo "Checking database setup..."
+# Database setup
+echo "Setting up database..."
 DB_EXISTS=$(mysql -u root -p -e "SHOW DATABASES LIKE 'furniture_eshop';" 2>/dev/null | grep furniture_eshop)
 
 if [ -z "$DB_EXISTS" ]; then
-    echo "Database 'furniture_eshop' not found."
-    read -p "Would you like to create it now? (y/n): " CREATE_DB
-    
-    if [ "$CREATE_DB" = "y" ] || [ "$CREATE_DB" = "Y" ]; then
-        echo "Creating database..."
+    read -p "Create database? (y/n): " CREATE_DB
+    if [ "$CREATE_DB" = "y" ]; then
         mysql -u root -p -e "CREATE DATABASE furniture_eshop;"
-        echo "Importing schema..."
         mysql -u root -p furniture_eshop < database/schema.sql
-        echo "✅ Database setup complete"
-    else
-        echo "⚠️  Please create the database manually and import schema.sql"
+        echo "✅ Database created"
     fi
 else
+    echo "✅ Database exists"
+fi
+
+# Check API key
+if grep -q "your_gemini_api_key_here" backend/config/config.php; then
+    echo "⚠️  Add Gemini API key to backend/config/config.php"
+    echo "   Get key from: https://aistudio.google.com/"
+fi
+
+echo ""
+echo "🎉 Setup complete!"
+echo ""
+echo "Start server: php -S localhost:8000 index.php"
+echo "Visit: http://localhost:8000"
     echo "✅ Database 'furniture_eshop' exists"
 fi
 

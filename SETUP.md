@@ -1,37 +1,28 @@
-# FurniVision - Complete Setup Guide
+# FurniVision Setup Guide
 
 ## 🎯 What You're Building
 
-A complete AI-enhanced furniture e-commerce platform that allows customers to:
-- Upload photos of their rooms
-- Get AI-powered furniture suggestions 
-- Shop for real furniture based on AI recommendations
-- Complete purchases with full e-commerce functionality
+AI-enhanced furniture e-commerce platform:
+- Upload room photos → Get AI furniture suggestions
+- Shop real furniture based on AI recommendations
+- Complete e-commerce with cart and checkout
 
-## 🏁 Final Steps to Complete Your Project
+## 🚀 Quick Setup
 
-Your platform is 95% complete! Here's what you need to do:
+### 1. Get Gemini API Key
 
-### 1. Get Your Google Gemini API Key (Required for AI Features)
+1. Visit [Google AI Studio](https://aistudio.google.com/)
+2. Sign in and click "Get API Key"
+3. Copy your API key
 
-1. Go to [Google AI Studio](https://aistudio.google.com/)
-2. Sign in with your Google account
-3. Click "Get API Key" 
-4. Create a new project or use an existing one
-5. Copy your API key
-
-### 2. Configure Your API Key
-
-Edit `backend/config/config.php` and add your API key:
+### 2. Configure API Key
 
 ```php
-// Replace 'your_gemini_api_key_here' with your actual API key
-define('GEMINI_API_KEY', 'AIzaSy...'); // Your actual key here
+// Edit backend/config/config.php
+define('GEMINI_API_KEY', 'your_actual_api_key_here');
 ```
 
-### 3. Set Up Your Database
-
-Run these commands in MySQL:
+### 3. Setup Database
 
 ```sql
 CREATE DATABASE furniture_eshop;
@@ -39,26 +30,22 @@ USE furniture_eshop;
 SOURCE database/schema.sql;
 ```
 
-### 4. Start Your Server
-
-Navigate to the frontend folder and start the PHP development server:
+### 4. Start Server
 
 ```bash
-cd frontend
-php -S localhost:8000
+php -S localhost:8000 index.php
 ```
 
-### 5. Test Your Platform
+### 5. Test Platform
 
-Open http://localhost:8000 in your browser and test:
+Visit http://localhost:8000 and test:
+- ✅ Browse products
+- ✅ Create account/login
+- ✅ Add to cart
+- ✅ Upload room photo (needs API key)
+- ✅ Get AI suggestions
 
-- ✅ Browse products by category
-- ✅ Create an account and login
-- ✅ Add items to cart
-- ✅ Upload a room photo for AI analysis (requires API key)
-- ✅ Get AI furniture suggestions
-
-## 🛠️ Complete File Structure
+## 📁 File Structure
 
 ```
 Furniture_E-Shop/
