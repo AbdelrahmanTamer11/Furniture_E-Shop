@@ -139,28 +139,44 @@ class FurnitureApp {
 
     setupSearch() {
         let searchTimeout;
-        const searchInput = document.createElement('input');
-        searchInput.type = 'text';
-        searchInput.placeholder = 'Search furniture...';
-        searchInput.className = 'search-input';
+
+        // Check if search input already exists
+        let searchInput = document.querySelector('.search-input');
+
+        if (!searchInput) {
+            searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.placeholder = 'Search furniture...';
+            searchInput.className = 'search-input';
+
+            // Add search to navigation if not exists
+            const navActions = document.querySelector('.nav-actions');
+            if (navActions) {
+                const searchContainer = document.createElement('div');
+                searchContainer.className = 'search-container';
+                searchContainer.appendChild(searchInput);
+                navActions.insertBefore(searchContainer, navActions.firstChild);
+            }
+        }
+
+        // Add search functionality
         searchInput.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                this.filters.search = e.target.value;
-                // Only call loadProducts, not filterProducts to avoid double calls
-                console.log('Search changed, loading products with search:', e.target.value);
-                this.loadProducts();
-            }, 500); // Increased debounce time for search
+                this.filters.search = e.target.value.toLowerCase().trim();
+                console.log('Search changed, filtering products with search:', this.filters.search);
+                this.filterProducts();
+            }, 300);
         });
 
-        // Add search to navigation if not exists
-        const navActions = document.querySelector('.nav-actions');
-        if (navActions && !navActions.querySelector('.search-input')) {
-            const searchContainer = document.createElement('div');
-            searchContainer.className = 'search-container';
-            searchContainer.appendChild(searchInput);
-            navActions.insertBefore(searchContainer, navActions.firstChild);
-        }
+        // Add clear search on escape key
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                this.filters.search = '';
+                this.filterProducts();
+            }
+        });
     }
 
     handleResize() {
@@ -303,23 +319,29 @@ class FurnitureApp {
     }
 
     // UI rendering
-    renderProductsByCategory() {
+    renderProductsByCategory(productsToRender = null) {
         const container = document.getElementById('productsByCategory');
         if (!container) return;
 
-        if (this.products.length === 0) {
-            container.innerHTML = '<div class="no-products">No products found matching your criteria.</div>';
+        const products = productsToRender || this.products;
+
+        if (products.length === 0) {
+            if (this.filters.search && this.filters.search.length > 0) {
+                container.innerHTML = `<div class="no-products">No products found for "${this.filters.search}". Try a different search term.</div>`;
+            } else {
+                container.innerHTML = '<div class="no-products">No products found matching your criteria.</div>';
+            }
             return;
         }
 
         // Group products by category
-        const productsByCategory = this.groupProductsByCategory(this.products);
+        const productsByCategory = this.groupProductsByCategory(products);
 
         // Render categories
         container.innerHTML = Object.keys(productsByCategory).map(categoryName => {
-            const products = productsByCategory[categoryName];
-            const visibleProducts = products.slice(0, 5);
-            const hasMore = products.length > 5;
+            const categoryProducts = productsByCategory[categoryName];
+            const visibleProducts = categoryProducts.slice(0, 5);
+            const hasMore = categoryProducts.length > 5;
 
             return `
                 <div class="category-section" data-category="${categoryName}">
@@ -329,7 +351,7 @@ class FurnitureApp {
                     </div>
                     ${hasMore ? `
                         <button class="show-more-btn" onclick="app.showMoreProducts('${categoryName}')">
-                            Show More (${products.length - 5} more)
+                            Show More (${categoryProducts.length - 5} more)
                         </button>
                     ` : ''}
                 </div>
@@ -641,6 +663,36 @@ class FurnitureApp {
         } catch (error) {
             console.error('Remove from cart error:', error);
         }
+    }
+
+    // Add new method to filter products based on search
+    filterProducts() {
+        if (!this.products || this.products.length === 0) {
+            console.log('No products to filter');
+            return;
+        }
+
+        let filteredProducts = [...this.products];
+
+        // Apply search filter
+        if (this.filters.search && this.filters.search.length > 0) {
+            filteredProducts = filteredProducts.filter(product => {
+                const searchTerm = this.filters.search;
+                return (
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    (product.description && product.description.toLowerCase().includes(searchTerm)) ||
+                    (product.category_name && product.category_name.toLowerCase().includes(searchTerm)) ||
+                    (product.style && product.style.toLowerCase().includes(searchTerm)) ||
+                    (product.material && product.material.toLowerCase().includes(searchTerm)) ||
+                    (product.color && product.color.toLowerCase().includes(searchTerm))
+                );
+            });
+        }
+
+        console.log(`Filtered ${filteredProducts.length} products from ${this.products.length} total`);
+
+        // Update displayed products
+        this.renderProductsByCategory(filteredProducts);
     }
 
     // Utility functions
