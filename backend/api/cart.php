@@ -210,38 +210,3 @@ try {
     echo json_encode(['error' => 'Internal server error: ' . $e->getMessage()]);
 }
 ?>
-                $cartTotal = $cart->getCartTotal($userId);
-                $cartCount = $cart->getCartCount($userId);
-                $userBalance = $cart->getUserBalance($userId);
-                
-                error_log("Cart DELETE - Fetched balance: $userBalance for user: $userId");
-                
-                $response = [
-                    'success' => true, 
-                    'message' => 'Item removed from cart',
-                    'items' => $cartItems,
-                    'total' => floatval($cartTotal),
-                    'count' => intval($cartCount),
-                    'balance' => floatval($userBalance)
-                ];
-                http_response_code(200);
-                echo json_encode($response);
-            } else {
-                http_response_code(500);
-                echo json_encode(['error' => 'Failed to remove item']);
-            }
-            exit;
-        }
-    }
-    
-    // If we get here, the action wasn't recognized
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid action or method']);
-    
-} catch (Exception $e) {
-    error_log("Cart API error: " . $e->getMessage());
-    error_log("Stack trace: " . $e->getTraceAsString());
-    http_response_code(500);
-    echo json_encode(['error' => 'Internal server error: ' . $e->getMessage()]);
-}
-?>
