@@ -58,7 +58,6 @@ class CheckoutManager {
         this.refreshUserBalanceIfNeeded();
     }
 
-    // Add method to refresh balance when needed
     async refreshUserBalanceIfNeeded() {
         if (!window.app?.currentUser) {
             return;
@@ -499,54 +498,6 @@ class CheckoutManager {
             notification.remove();
         }, 3000);
     }
-}
-
-// Global functions for navigation
-function nextStep() {
-    if (window.checkoutManager) {
-        window.checkoutManager.nextStep();
-    }
-}
-
-function prevStep() {
-    if (window.checkoutManager) {
-        window.checkoutManager.prevStep();
-    }
-}
-
-function editStep(stepNumber) {
-    if (window.checkoutManager) {
-        window.checkoutManager.editStep(stepNumber);
-    }
-}
-
-function goBack() {
-    window.history.back();
-}
-
-function goToHome() {
-    const successModal = document.getElementById('successModal');
-    if (successModal) {
-        successModal.classList.remove('show');
-    }
-    window.location.href = '/';
-}
-
-function viewOrder() {
-    // Implement order details view
-    alert('Order details page would open here');
-}
-
-function placeOrder() {
-    if (window.checkoutManager) {
-        window.checkoutManager.placeOrder();
-    }
-}
-
-// Cart functions (simplified)
-function toggleCart() {
-    // Redirect to checkout if needed or show cart sidebar
-    console.log('Toggle cart');
 }
 
 // Initialize checkout manager when page loads

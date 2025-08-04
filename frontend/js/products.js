@@ -9,14 +9,9 @@ class ProductManager {
     }
 
     setupProductHandlers() {
-        // Setup infinite scroll or pagination
         this.setupScrollListener();
-
-        // Setup product quickview
         this.setupQuickView();
-
-        // Setup product comparison
-        this.setupComparison();
+        // Removed: this.setupComparison(); // Not used
     }
 
     setupScrollListener() {
@@ -28,7 +23,6 @@ class ProductManager {
             const scrollPosition = window.innerHeight + window.scrollY;
             const documentHeight = document.documentElement.offsetHeight;
 
-            // Load more when user is 200px from bottom
             if (scrollPosition >= documentHeight - 200) {
                 isLoading = true;
                 this.loadMoreProducts().finally(() => {
@@ -53,7 +47,6 @@ class ProductManager {
             if (data.products && data.products.length > 0) {
                 this.appendProducts(data.products);
             } else {
-                // No more products to load
                 this.showEndMessage();
             }
         } catch (error) {
@@ -109,7 +102,6 @@ class ProductManager {
     }
 
     setupQuickView() {
-        // Create quick view modal
         this.createQuickViewModal();
     }
 
@@ -127,9 +119,7 @@ class ProductManager {
                     <div class="product-quick-view">
                         <div class="product-image-section">
                             <img id="quickViewImage" src="" alt="Product Image" class="main-product-image">
-                            <div class="product-gallery" id="quickViewGallery">
-                                <!-- Additional images will go here -->
-                            </div>
+                            <div class="product-gallery" id="quickViewGallery"></div>
                         </div>
                         <div class="product-details-section">
                             <h2 id="quickViewName"></h2>
@@ -167,7 +157,6 @@ class ProductManager {
                 </div>
             </div>
         `;
-
         document.body.appendChild(modal);
     }
 
@@ -196,7 +185,6 @@ class ProductManager {
         document.getElementById('quickViewDimensions').textContent = product.dimensions || 'N/A';
         document.getElementById('quickViewStock').textContent = product.stock_quantity > 0 ? `${product.stock_quantity} available` : 'Out of stock';
 
-        // Setup add to cart button
         const addToCartBtn = document.getElementById('quickViewAddToCart');
         addToCartBtn.onclick = () => {
             const quantity = parseInt(document.getElementById('quickViewQuantity').value);
@@ -204,7 +192,6 @@ class ProductManager {
             this.closeQuickView();
         };
 
-        // Handle gallery images if available
         if (product.gallery_images) {
             this.populateGallery(JSON.parse(product.gallery_images));
         }
@@ -235,101 +222,8 @@ class ProductManager {
         quantityInput.value = newValue;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // Advanced filtering
-    setupAdvancedFilters() {
-        this.createFilterSidebar();
-    }
-
-    createFilterSidebar() {
-        const sidebar = document.createElement('div');
-        sidebar.id = 'filterSidebar';
-        sidebar.className = 'filter-sidebar';
-        sidebar.innerHTML = `
-            <div class="filter-header">
-                <h3>Filters</h3>
-                <button onclick="productManager.clearAllFilters()">Clear All</button>
-            </div>
-            <div class="filter-sections">
-                <div class="filter-section">
-                    <h4>Price Range</h4>
-                    <div class="price-range-slider">
-                        <input type="range" id="minPrice" min="0" max="2000" value="0">
-                        <input type="range" id="maxPrice" min="0" max="2000" value="2000">
-                        <div class="price-values">
-                            <span id="minPriceValue">$0</span> - <span id="maxPriceValue">$2000</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="filter-section">
-                    <h4>Categories</h4>
-                    <div class="filter-checkboxes" id="categoryFilters">
-                        <!-- Category checkboxes will be populated here -->
-                    </div>
-                </div>
-                <div class="filter-section">
-                    <h4>Styles</h4>
-                    <div class="filter-checkboxes" id="styleFilters">
-                        <!-- Style checkboxes will be populated here -->
-                    </div>
-                </div>
-                <div class="filter-section">
-                    <h4>Materials</h4>
-                    <div class="filter-checkboxes" id="materialFilters">
-                        <!-- Material checkboxes will be populated here -->
-                    </div>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(sidebar);
-    }
-
-    // Wishlist functionality
-    addToWishlist(productId) {
-        if (!app.currentUser) {
-            app.showAlert('Please login to add items to wishlist', 'warning');
-            toggleAuth();
-            return;
-        }
-
-        // This would be implemented with backend storage
-        app.showAlert('Added to wishlist!', 'success');
-    }
-
-    // Product sharing
-    shareProduct(productId, productName) {
-        const shareData = {
-            title: productName,
-            text: `Check out this furniture item: ${productName}`,
-            url: `${window.location.origin}/?product=${productId}`
-        };
-
-        if (navigator.share) {
-            navigator.share(shareData);
-        } else {
-            // Fallback: copy link to clipboard
-            navigator.clipboard.writeText(shareData.url).then(() => {
-                app.showAlert('Product link copied to clipboard!', 'success');
-            });
-        }
-    }
+    // Removed: setupAdvancedFilters, createFilterSidebar, addToWishlist, shareProduct (not used)
 }
 
 // Initialize product manager
 const productManager = new ProductManager();
-
-// Export for global access
-window.productManager = productManager;

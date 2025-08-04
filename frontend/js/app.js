@@ -1,5 +1,5 @@
 // Main application JavaScript
-const API_BASE = '/backend/api';  // Remove the './backend/api'
+const API_BASE = '/backend/api';
 
 class FurnitureApp {
     constructor() {
@@ -7,8 +7,8 @@ class FurnitureApp {
         this.cartItems = [];
         this.products = [];
         this.filteredProducts = [];
-        this.isLoadingProducts = false; // Flag to prevent multiple simultaneous API calls
-        this.isLoading = false; // Add this to prevent multiple calls
+        this.isLoadingProducts = false;
+        this.isLoading = false;
         this.filters = {
             category: '',
             style: '',
@@ -27,7 +27,6 @@ class FurnitureApp {
         this.setupMobileNavigation();
     }
 
-    // Authentication management
     loadAuthToken() {
         const token = localStorage.getItem('auth_token');
         if (token) {
@@ -49,7 +48,6 @@ class FurnitureApp {
                 this.updateAuthUI();
                 this.loadCart();
 
-                // Start dynamic balance refresh
                 if (window.cartManager) {
                     window.cartManager.startBalanceRefresh();
                 }
@@ -74,11 +72,10 @@ class FurnitureApp {
     }
 
     showUserMenu() {
-        // Replace old user menu with hamburger toggle
         toggleUserHamburger();
     }
 
-    async logout() {
+        async logout() {
         const token = localStorage.getItem('auth_token');
         if (token) {
             try {
@@ -100,47 +97,40 @@ class FurnitureApp {
         this.updateAuthUI();
         this.updateCartUI();
 
-        // Stop balance refresh when logging out
         if (window.cartManager) {
             window.cartManager.stopBalanceRefresh();
         }
 
         this.showAlert('Logged out successfully', 'success');
 
-        // Remove user menu if exists
         const userMenu = document.querySelector('.user-menu');
         if (userMenu) userMenu.remove();
+
+        // Refresh the site after successful logout
+        setTimeout(() => {
+            window.location.reload();
+        }, 800);
     }
 
-    // Event listeners setup
     setupEventListeners() {
-        // Remove any existing event listeners first to prevent duplicates
         const priceRange = document.getElementById('priceRange');
         if (priceRange) {
-            // Clone element to remove all existing event listeners
             const newPriceRange = priceRange.cloneNode(true);
             priceRange.parentNode.replaceChild(newPriceRange, priceRange);
 
-            // Add single event listener for price display update only
             newPriceRange.addEventListener('input', (e) => {
                 document.getElementById('priceValue').textContent = '$' + e.target.value;
             });
         }
 
-        // Search functionality
         this.setupSearch();
 
-        // Window resize handler
         window.addEventListener('resize', this.handleResize.bind(this));
-
-        // Scroll handler for navbar
         window.addEventListener('scroll', this.handleScroll.bind(this));
     }
 
     setupSearch() {
         let searchTimeout;
-
-        // Check if search input already exists
         let searchInput = document.querySelector('.search-input');
 
         if (!searchInput) {
@@ -149,7 +139,6 @@ class FurnitureApp {
             searchInput.placeholder = 'Search furniture...';
             searchInput.className = 'search-input';
 
-            // Add search to navigation if not exists
             const navActions = document.querySelector('.nav-actions');
             if (navActions) {
                 const searchContainer = document.createElement('div');
@@ -159,17 +148,14 @@ class FurnitureApp {
             }
         }
 
-        // Add search functionality
         searchInput.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 this.filters.search = e.target.value.toLowerCase().trim();
-                console.log('Search changed, filtering products with search:', this.filters.search);
                 this.filterProducts();
             }, 300);
         });
 
-        // Add clear search on escape key
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 searchInput.value = '';
@@ -180,7 +166,6 @@ class FurnitureApp {
     }
 
     handleResize() {
-        // Handle responsive layout changes
         this.updateLayout();
     }
 
@@ -194,7 +179,6 @@ class FurnitureApp {
     }
 
     updateLayout() {
-        // Update layout based on screen size
         const isMobile = window.innerWidth <= 768;
         const cartSidebar = document.getElementById('cartSidebar');
 
@@ -205,7 +189,6 @@ class FurnitureApp {
         }
     }
 
-    // Data loading
     async loadInitialData() {
         try {
             await Promise.all([
@@ -215,7 +198,6 @@ class FurnitureApp {
                 this.loadFeaturedProducts()
             ]);
         } catch (error) {
-            console.error('Failed to load initial data:', error);
             this.showAlert('Failed to load data. Please refresh the page.', 'error');
         }
     }
@@ -263,19 +245,14 @@ class FurnitureApp {
         this.isLoading = true;
 
         try {
-            console.log('Loading products from API...');
-
             const response = await fetch('./backend/api/products.php');
-
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
-            console.log('Products data received:', data);
 
             if (data.products && Array.isArray(data.products) && data.products.length > 0) {
-                // Remove duplicates based on product name
                 const uniqueProducts = this.removeDuplicateProducts(data.products);
                 this.products = uniqueProducts;
                 this.filteredProducts = [...this.products];
@@ -285,7 +262,6 @@ class FurnitureApp {
                     '<p style="text-align: center; color: #666;">No products available.</p>';
             }
         } catch (error) {
-            console.error('Error loading products:', error);
             document.getElementById('productsByCategory').innerHTML =
                 '<p style="text-align: center; color: #e74c3c;">Error loading products.</p>';
         } finally {
@@ -293,16 +269,15 @@ class FurnitureApp {
         }
     }
 
-    // Add this new method to remove duplicates
     removeDuplicateProducts(products) {
         const seen = new Set();
         return products.filter(product => {
             const key = `${product.name}-${product.category_id}`;
             if (seen.has(key)) {
-                return false; // Skip duplicate
+                return false;
             }
             seen.add(key);
-            return true; // Keep unique product
+            return true;
         });
     }
 
@@ -310,15 +285,12 @@ class FurnitureApp {
         try {
             const response = await fetch(`${this.API_BASE}/products.php?action=featured&limit=6`);
             const data = await response.json();
-
-            // Display featured products in hero section or dedicated area
             this.renderFeaturedProducts(data.products || []);
         } catch (error) {
             console.error('Failed to load featured products:', error);
         }
     }
 
-    // UI rendering
     renderProductsByCategory(productsToRender = null) {
         const container = document.getElementById('productsByCategory');
         if (!container) return;
@@ -334,10 +306,8 @@ class FurnitureApp {
             return;
         }
 
-        // Group products by category
         const productsByCategory = this.groupProductsByCategory(products);
 
-        // Render categories
         container.innerHTML = Object.keys(productsByCategory).map(categoryName => {
             const categoryProducts = productsByCategory[categoryName];
             const visibleProducts = categoryProducts.slice(0, 5);
@@ -361,7 +331,6 @@ class FurnitureApp {
 
     groupProductsByCategory(products) {
         const grouped = {};
-
         products.forEach(product => {
             const category = product.category_name || 'Uncategorized';
             if (!grouped[category]) {
@@ -369,7 +338,6 @@ class FurnitureApp {
             }
             grouped[category].push(product);
         });
-
         return grouped;
     }
 
@@ -382,10 +350,8 @@ class FurnitureApp {
 
         if (!grid || !categoryProducts) return;
 
-        // Show all products for this category
         grid.innerHTML = categoryProducts.map(product => this.createProductCard(product)).join('');
 
-        // Hide the show more button
         if (showMoreBtn) {
             showMoreBtn.style.display = 'none';
         }
@@ -433,7 +399,6 @@ class FurnitureApp {
     }
 
     renderFeaturedProducts(products) {
-        // Could be used to populate a featured section
         console.log('Featured products:', products);
     }
 
@@ -444,7 +409,6 @@ class FurnitureApp {
         }
     }
 
-    // Cart functionality
     async loadCart() {
         if (!this.currentUser) return;
 
@@ -458,31 +422,19 @@ class FurnitureApp {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('App loadCart response:', data);
-
                 this.cartItems = data.items || [];
-                // CRITICAL FIX: Ensure balance is properly set in app
                 this.userBalance = parseFloat(data.balance || 0);
-
-                console.log('App - Set userBalance to:', this.userBalance);
 
                 this.updateCartUI();
 
-                // Also update CartManager if it exists - FORCE BALANCE UPDATE
                 if (window.cartManager) {
                     window.cartManager.userBalance = this.userBalance;
                     window.cartManager.cartItems = this.cartItems;
                     window.cartManager.cartTotal = parseFloat(data.total || 0);
                     window.cartManager.cartCount = parseInt(data.count || 0);
-
-                    console.log('Updating CartManager with balance:', this.userBalance);
                     window.cartManager.updateCartUI();
-
-                    // Force balance display update
                     window.cartManager.updateBalanceDisplay();
                 }
-            } else {
-                console.error('App loadCart failed:', response.status);
             }
         } catch (error) {
             console.error('Failed to load cart:', error);
@@ -490,32 +442,19 @@ class FurnitureApp {
     }
 
     async addToCart(productId, quantity = 1) {
-        console.log('=== APP ADD TO CART METHOD ===');
-        console.log('Product ID:', productId);
-        console.log('Quantity:', quantity);
-        console.log('Current user:', this.currentUser);
-
         if (!this.currentUser) {
-            console.log('User not logged in in app method');
             this.showAlert('You must login first', 'warning');
             toggleAuth();
             return;
         }
 
-        console.log('User is logged in, proceeding with API call...');
-
         try {
             const token = localStorage.getItem('auth_token');
-            console.log('Token exists:', !!token);
-            console.log('API URL:', `${API_BASE}/cart.php`);
-
             const requestBody = {
                 action: 'add',
                 product_id: parseInt(productId),
                 quantity: parseInt(quantity)
             };
-
-            console.log('Request body:', requestBody);
 
             const response = await fetch(`${API_BASE}/cart.php`, {
                 method: 'POST',
@@ -526,18 +465,13 @@ class FurnitureApp {
                 body: JSON.stringify(requestBody)
             });
 
-            console.log('API response status:', response.status);
-
             const responseText = await response.text();
-            console.log('Raw response:', responseText);
 
             if (response.ok) {
                 let result;
                 try {
                     result = JSON.parse(responseText);
-                    console.log('Parsed API success result:', result);
 
-                    // Update local cart data
                     if (result.items) {
                         this.cartItems = result.items;
                         this.updateCartUI();
@@ -545,7 +479,6 @@ class FurnitureApp {
 
                     this.showAlert('Item added to cart!', 'success');
 
-                    // Also update CartManager if available
                     if (window.cartManager) {
                         window.cartManager.cartItems = result.items || [];
                         window.cartManager.cartTotal = result.total || 0;
@@ -555,25 +488,17 @@ class FurnitureApp {
                     }
 
                 } catch (parseError) {
-                    console.error('Failed to parse response as JSON:', parseError);
                     this.showAlert('Item added to cart!', 'success');
                 }
             } else {
-                console.error('API error status:', response.status);
-                console.error('API error response:', responseText);
-
                 let errorMessage = 'Failed to add item to cart';
                 try {
                     const error = JSON.parse(responseText);
                     errorMessage = error.error || error.message || errorMessage;
-                } catch (parseError) {
-                    console.error('Failed to parse error response:', parseError);
-                }
-
+                } catch (parseError) {}
                 this.showAlert(errorMessage, 'error');
             }
         } catch (error) {
-            console.error('Network or other error:', error);
             this.showAlert('Network error. Please try again.', 'error');
         }
     }
@@ -665,16 +590,13 @@ class FurnitureApp {
         }
     }
 
-    // Add new method to filter products based on search
     filterProducts() {
         if (!this.products || this.products.length === 0) {
-            console.log('No products to filter');
             return;
         }
 
         let filteredProducts = [...this.products];
 
-        // Apply search filter
         if (this.filters.search && this.filters.search.length > 0) {
             filteredProducts = filteredProducts.filter(product => {
                 const searchTerm = this.filters.search;
@@ -689,15 +611,10 @@ class FurnitureApp {
             });
         }
 
-        console.log(`Filtered ${filteredProducts.length} products from ${this.products.length} total`);
-
-        // Update displayed products
         this.renderProductsByCategory(filteredProducts);
     }
 
-    // Utility functions
     showAlert(message, type = 'info') {
-        // Remove existing alerts
         const existingAlert = document.querySelector('.alert');
         if (existingAlert) {
             existingAlert.remove();
@@ -709,7 +626,6 @@ class FurnitureApp {
 
         document.body.appendChild(alert);
 
-        // Auto remove after 3 seconds
         setTimeout(() => {
             alert.remove();
         }, 3000);
@@ -741,31 +657,6 @@ class FurnitureApp {
             });
         }
     }
-
-    // Add this method to the FurnitureApp class for testing:
-
-    async testCartAPI() {
-        console.log('=== TESTING CART API ===');
-        try {
-            const response = await fetch(`${this.API_BASE}/cart.php`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            console.log('Test API response status:', response.status);
-            const result = await response.text();
-            console.log('Test API response:', result);
-
-            return response.ok;
-        } catch (error) {
-            console.error('Test API error:', error);
-            return false;
-        }
-    }
-
-
 }
 
 // Global functions for HTML onclick handlers
@@ -773,7 +664,6 @@ function toggleCart() {
     if (window.cartManager) {
         window.cartManager.openCart();
     } else {
-        // Fallback if cartManager not available
         const cartSidebar = document.getElementById('cartSidebar');
         cartSidebar.classList.toggle('open');
     }
@@ -783,7 +673,6 @@ function closeCart() {
     if (window.cartManager) {
         window.cartManager.closeCart();
     } else {
-        // Fallback if cartManager not available
         const cartSidebar = document.getElementById('cartSidebar');
         cartSidebar.classList.remove('open');
         document.body.style.overflow = '';
@@ -795,104 +684,18 @@ function toggleAuth() {
     authModal.classList.toggle('show');
 }
 
-function loadMoreProducts() {
-    console.log('Load more products');
-}
-
-function openAIDesign() {
-    document.getElementById('ai-design').scrollIntoView({
-        behavior: 'smooth'
-    });
-}
-
-function scrollToProducts() {
-    document.getElementById('products').scrollIntoView({
-        behavior: 'smooth'
-    });
-}
-
-function scrollToAbout() {
-    document.getElementById('about').scrollIntoView({
-        behavior: 'smooth'
-    });
-}
-
-function scrollToContact() {
-    document.getElementById('contact').scrollIntoView({
-        behavior: 'smooth'
-    });
-}
-
-function scrollToAIAssistant() {
-    const aiSection = document.getElementById('ai-assistant');
-    if (aiSection) {
-        aiSection.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
-    }
-}
-
-// Enhanced navigation with active states
-document.addEventListener('DOMContentLoaded', function () {
-    // Handle all navigation links with smooth scrolling
-    const navLinks = document.querySelectorAll('a[href^="#"]');
-
-    navLinks.forEach(link => {
-        link.addEventListener('click', function (e) {
-            const href = this.getAttribute('href');
-            const targetId = href.substring(1);
-            const targetElement = document.getElementById(targetId);
-
-            if (targetElement) {
-                e.preventDefault();
-                targetElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-
-                // Update active states
-                updateActiveNavigation(targetId);
-            }
-        });
-    });
-});
-
-function updateActiveNavigation(activeId) {
-    // Remove active class from all nav links
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-    });
-
-    // Add active class to current nav link
-    const activeLink = document.querySelector(`.nav-link[href="#${activeId}"]`);
-    if (activeLink) {
-        activeLink.classList.add('active');
-    }
-}
-
-// SINGLE GLOBAL ADD TO CART HANDLER
 function handleAddToCart(productId) {
-    console.log('=== ADD TO CART CLICKED ===');
-    console.log('Product ID:', productId);
-    console.log('App current user:', window.app ? window.app.currentUser : 'App not found');
-
     if (!window.app) {
-        console.error('App not initialized');
         alert('System error: App not initialized');
         return;
     }
 
-    // Check if user is logged in
     if (!window.app.currentUser) {
-        console.log('User not logged in, showing auth modal');
         window.app.showAlert('You must login first', 'warning');
         toggleAuth();
         return;
     }
 
-    console.log('User is logged in, adding to cart...');
     window.app.addToCart(productId);
 }
 
@@ -901,23 +704,15 @@ const app = new FurnitureApp();
 window.app = app;
 
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOM loaded, app initialized');
-
-    // Initialize other managers after DOM is ready
     if (typeof CartManager !== 'undefined') {
         window.cartManager = new CartManager();
-        console.log('CartManager initialized');
 
-        // Ensure checkout modal is created
         if (window.cartManager.setupCheckout) {
             window.cartManager.setupCheckout();
-            console.log('Checkout setup completed');
         }
 
-        // FORCE BALANCE SYNC after initialization
         setTimeout(() => {
             if (window.app && window.app.currentUser && window.app.userBalance) {
-                console.log('Syncing balance from app to cartManager:', window.app.userBalance);
                 window.cartManager.userBalance = window.app.userBalance;
                 window.cartManager.updateBalanceDisplay();
                 window.cartManager.updateCheckoutButton();
@@ -927,56 +722,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (typeof ProductManager !== 'undefined') {
         window.productManager = new ProductManager();
-        console.log('ProductManager initialized');
     }
 });
 
-// Test function
 window.testAuth = function () {
-    console.log('=== AUTH TEST ===');
-    console.log('App exists:', !!window.app);
-    console.log('Current user:', window.app ? window.app.currentUser : 'No app');
-    console.log('Auth token:', localStorage.getItem('auth_token'));
     return window.app ? !!window.app.currentUser : false;
 };
-
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOM loaded, app initialized');
-
-    // Initialize other managers after DOM is ready
-    if (typeof CartManager !== 'undefined') {
-        window.cartManager = new CartManager();
-        console.log('CartManager initialized');
-
-        // Ensure checkout modal is created
-        if (window.cartManager.setupCheckout) {
-            window.cartManager.setupCheckout();
-            console.log('Checkout setup completed');
-        }
-
-        // FORCE BALANCE SYNC after initialization
-        setTimeout(() => {
-            if (window.app && window.app.currentUser && window.app.userBalance) {
-                console.log('Syncing balance from app to cartManager:', window.app.userBalance);
-                window.cartManager.userBalance = window.app.userBalance;
-                window.cartManager.updateBalanceDisplay();
-                window.cartManager.updateCheckoutButton();
-            }
-        }, 1000);
-    }
-
-    if (typeof ProductManager !== 'undefined') {
-        window.productManager = new ProductManager();
-        console.log('ProductManager initialized');
-    }
-});
-
-// Test function
-window.testAuth = function () {
-    console.log('=== AUTH TEST ===');
-    console.log('App exists:', !!window.app);
-    console.log('Current user:', window.app ? window.app.currentUser : 'No app');
-    console.log('Auth token:', localStorage.getItem('auth_token'));
-    return window.app ? !!window.app.currentUser : false;
-};
-
