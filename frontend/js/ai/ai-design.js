@@ -1,9 +1,3 @@
-// This file is now deprecated - all functionality moved to ai-assistant.js
-// Keep this file for backward compatibility but redirect to new system
-
-console.warn('ai-design.js is deprecated. Please use ai-assistant.js instead.');
-
-// Redirect old global functions to new system
 window.aiDesign = window.aiDesign || {
     analyzeRoom: function () {
         if (window.aiDesign && window.aiDesign.analyzeRoom) {
