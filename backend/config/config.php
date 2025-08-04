@@ -6,7 +6,7 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 
 // Gemini AI API configuration
-define('GEMINI_API_KEY', 'AIzaSyCEy8plT-PIyPtSpYOnxMVtLWgQnvRMUgo');
+define('GEMINI_API_KEY', 'AIzaSyD9SLKug4niUl_PP9mSKuNqD-mfQHnCZ34');
 define('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent');
 
 // Application settings
