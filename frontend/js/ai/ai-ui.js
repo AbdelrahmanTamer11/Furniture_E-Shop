@@ -27,6 +27,14 @@ AIRoomAssistant.prototype.setupEventListeners = function () {
             }
         });
     }
+
+    // Remove image button click
+    const removeBtn = document.getElementById('removeImageBtn');
+    if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+            this.removeImage();
+        });
+    }
 };
 
 AIRoomAssistant.prototype.setupDragAndDrop = function () {

@@ -200,7 +200,8 @@ AIRoomAssistant.prototype.getColorGradient = function (color) {
         'Green': 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)',
         'Red': 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
         'Beige': 'linear-gradient(135deg, #f5f5dc 0%, #deb887 100%)',
-        'Navy': 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)'
+        'Navy': 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+        'Light Wood': 'linear-gradient(135deg, #3f392cff 0%, #544532ff 100%)',
     };
 
     return colorMap[color] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
