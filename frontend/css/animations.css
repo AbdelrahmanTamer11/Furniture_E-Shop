@@ -1,0 +1,92 @@
+/* Animation Keyframes */
+@keyframes subtleMove {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(-10px, -5px);
+    }
+
+    50% {
+        transform: translate(-5px, -10px);
+    }
+
+    75% {
+        transform: translate(-15px, -8px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes aiPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);
+    }
+
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 12px 35px rgba(139, 69, 19, 0.4);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

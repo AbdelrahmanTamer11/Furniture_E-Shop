@@ -1,0 +1,145 @@
+/* Utility Classes and Miscellaneous Styles */
+
+/* Notification styles */
+.notification {
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Search functionality */
+.search-container {
+    position: relative;
+    margin-right: 1rem;
+}
+
+.search-input {
+    width: 250px;
+    padding: 0.75rem 1rem;
+    border: 2px solid rgba(205, 133, 63, 0.3);
+    border-radius: 25px;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.9);
+    color: #2c1810;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #8b7355;
+    opacity: 0.8;
+}
+
+.search-input:focus {
+    border-color: #8b4513;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+    transform: translateY(-1px);
+    width: 280px;
+}
+
+.search-input:hover {
+    border-color: #cd853f;
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* No products message styling */
+.no-products {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #654321;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(245, 222, 179, 0.4) 100%);
+    border-radius: 20px;
+    margin: 2rem 0;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(139, 69, 19, 0.1);
+}
+
+/* Suggestions grid for AI assistant */
+.suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.total-cost-card {
+    background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    grid-column: 1 / -1;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.total-header h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.total-amount {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.total-actions {
+    margin-top: 1.5rem;
+}
+
+/* Cart item scrollbar styles */
+.cart-items::-webkit-scrollbar {
+    width: 8px;
+}
+
+.cart-items::-webkit-scrollbar-track {
+    background: rgba(205, 133, 63, 0.1);
+    border-radius: 10px;
+}
+
+.cart-items::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #cd853f, #deb887);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.cart-items::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #8b4513, #cd853f);
+}
+
+/* Mobile responsive utilities */
+@media (max-width: 768px) {
+    .search-container {
+        margin-right: 0.5rem;
+    }
+
+    .search-input {
+        width: 180px;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .search-input:focus {
+        width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-input {
+        width: 140px;
+        font-size: 0.8rem;
+    }
+
+    .search-input:focus {
+        width: 160px;
+    }
+}

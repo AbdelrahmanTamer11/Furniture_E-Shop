@@ -1,0 +1,428 @@
+/* AI Room Design Assistant Section */
+.ai-assistant-section {
+    padding: 120px 2rem;
+    margin: 6rem 0;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+}
+
+.ai-assistant-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        linear-gradient(135deg, rgba(139, 69, 19, 0.05) 0%, rgba(222, 184, 135, 0.1) 100%),
+        radial-gradient(circle at 30% 70%, rgba(205, 133, 63, 0.08) 0%, transparent 60%);
+    border-radius: 40px;
+    z-index: -1;
+}
+
+.ai-assistant-container {
+    max-width: 1000px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.ai-title-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 222, 179, 0.8) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 30px;
+    padding: 3rem;
+    box-shadow:
+        0 25px 60px rgba(139, 69, 19, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 2px solid rgba(139, 69, 19, 0.1);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-title-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="%23cd853f" fill-opacity="0.03"><circle cx="30" cy="30" r="3"/><circle cx="10" cy="10" r="1.5"/><circle cx="50" cy="50" r="2"/></g></svg>');
+    pointer-events: none;
+    z-index: -1;
+}
+
+.ai-assistant-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #2c1810;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #2c1810, #654321, #8b4513);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+}
+
+.ai-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #8b4513, #cd853f);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #faf8f3;
+    box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);
+    animation: aiPulse 3s ease-in-out infinite;
+}
+
+.ai-assistant-description {
+    font-size: 1.2rem;
+    color: #654321;
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+    opacity: 0.9;
+}
+
+.ai-upload-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 222, 179, 0.8) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 2.5rem;
+    box-shadow:
+        0 20px 50px rgba(139, 69, 19, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 2px solid rgba(139, 69, 19, 0.1);
+    transition: all 0.3s ease;
+}
+
+.ai-upload-card:hover {
+    transform: translateY(-5px);
+    box-shadow:
+        0 30px 70px rgba(139, 69, 19, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.upload-card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c1810;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.upload-area {
+    border: 3px dashed rgba(139, 69, 19, 0.3);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-area:hover {
+    border-color: #8b4513;
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 69, 19, 0.1);
+}
+
+.upload-area.dragover {
+    border-color: #cd853f;
+    background: rgba(205, 133, 63, 0.1);
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #8b4513;
+    opacity: 0.7;
+}
+
+.upload-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c1810;
+    margin-bottom: 0.5rem;
+}
+
+.upload-subtext {
+    font-size: 0.9rem;
+    color: #654321;
+    opacity: 0.8;
+    margin-bottom: 1.5rem;
+}
+
+.file-input {
+    display: none;
+}
+
+.image-preview-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 222, 179, 0.8) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 2rem;
+    box-shadow:
+        0 20px 50px rgba(139, 69, 19, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 2px solid rgba(139, 69, 19, 0.1);
+    text-align: center;
+    display: none;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.image-preview-card.show {
+    display: block;
+}
+
+.preview-card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c1810;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.preview-img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(139, 69, 19, 0.2);
+    border: 2px solid rgba(205, 133, 63, 0.3);
+}
+
+.ai-options-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 222, 179, 0.8) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 2.5rem;
+    box-shadow:
+        0 20px 50px rgba(139, 69, 19, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 2px solid rgba(139, 69, 19, 0.1);
+    transition: all 0.3s ease;
+}
+
+.ai-options-card:hover {
+    transform: translateY(-5px);
+    box-shadow:
+        0 30px 70px rgba(139, 69, 19, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.options-card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c1810;
+    margin-bottom: 2rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.ai-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.option-group {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 15px;
+    padding: 1.5rem;
+    border: 1px solid rgba(139, 69, 19, 0.1);
+    transition: all 0.3s ease;
+}
+
+.option-group:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 69, 19, 0.1);
+}
+
+.option-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2c1810;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.option-select {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid rgba(205, 133, 63, 0.3);
+    border-radius: 12px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    color: #2c1810;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.option-select:focus {
+    outline: none;
+    border-color: #8b4513;
+    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+    transform: translateY(-1px);
+}
+
+.ai-analyze-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 222, 179, 0.8) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 2rem;
+    box-shadow:
+        0 20px 50px rgba(139, 69, 19, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 2px solid rgba(139, 69, 19, 0.1);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.ai-analyze-card:hover {
+    transform: translateY(-5px);
+    box-shadow:
+        0 30px 70px rgba(139, 69, 19, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.ai-results-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 222, 179, 0.8) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 2.5rem;
+    box-shadow:
+        0 25px 60px rgba(139, 69, 19, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 2px solid rgba(139, 69, 19, 0.1);
+    display: none;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.ai-results-card.show {
+    display: block;
+}
+
+.results-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c1810;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.results-content {
+    font-size: 1rem;
+    color: #654321;
+    line-height: 1.7;
+    text-align: left;
+}
+
+.upload-content {
+    transition: all 0.3s ease;
+}
+
+/* Mobile responsive design for AI assistant */
+@media (max-width: 768px) {
+    .ai-assistant-container {
+        margin: 0 1rem;
+    }
+
+    .ai-title-card,
+    .ai-upload-card,
+    .ai-options-card,
+    .ai-analyze-card,
+    .ai-results-card,
+    .image-preview-card {
+        padding: 2rem;
+    }
+
+    .ai-assistant-title {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .ai-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+
+    .ai-options {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .upload-area {
+        padding: 2rem 1rem;
+    }
+
+    .upload-icon {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .ai-assistant-section {
+        padding: 80px 1rem;
+    }
+
+    .ai-title-card,
+    .ai-upload-card,
+    .ai-options-card,
+    .ai-analyze-card,
+    .ai-results-card,
+    .image-preview-card {
+        padding: 1.5rem;
+    }
+
+    .ai-assistant-title {
+        font-size: 1.8rem;
+    }
+
+    .ai-assistant-description {
+        font-size: 1rem;
+    }
+
+    .upload-area {
+        padding: 1.5rem 1rem;
+    }
+}

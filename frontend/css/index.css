@@ -1,0 +1,19 @@
+/* Main CSS Index File - Imports all component stylesheets */
+
+/* Import all CSS component files in the correct order */
+@import './base.css';
+@import './animations.css';
+@import './buttons.css';
+@import './navigation.css';
+@import './hero.css';
+@import './features.css';
+@import './products.css';
+@import './cart.css';
+@import './modals.css';
+@import './ai-assistant.css';
+@import './footer.css';
+@import './hamburger-menu.css';
+@import './utilities.css';
+@import './responsive.css';
+
+/* Any additional global styles can be added here */

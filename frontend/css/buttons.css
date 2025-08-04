@@ -1,0 +1,354 @@
+/* Enhanced Modern Wooden Buttons */
+.btn-primary,
+.btn-secondary {
+    padding: 1.25rem 2.5rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    min-width: 160px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #8b4513, #cd853f, #deb887);
+    color: #faf8f3;
+    box-shadow:
+        0 8px 25px rgba(139, 69, 19, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(139, 69, 19, 0.4);
+    background: linear-gradient(135deg, #cd853f, #deb887, #f5deb3);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #8b4513;
+    border: 2px solid #8b4513;
+    backdrop-filter: blur(10px);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #8b4513, #cd853f);
+    color: #faf8f3;
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(139, 69, 19, 0.4);
+}
+
+.btn-primary.full-width {
+    width: 100%;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #8b4513 0%, #cd853f 100%);
+    color: #f4f1ea;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    margin-top: 1.5rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow:
+        0 6px 20px rgba(139, 69, 19, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-primary.full-width:hover {
+    background: linear-gradient(135deg, #cd853f, #deb887);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(139, 69, 19, 0.4);
+}
+
+.btn-primary.full-width.loading {
+    background: linear-gradient(135deg, #6b7280, #9ca3af);
+    cursor: not-allowed;
+    pointer-events: none;
+    color: transparent;
+}
+
+.btn-primary.full-width.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.add-to-cart-btn {
+    background: linear-gradient(135deg, #8b4513, #cd853f);
+    color: #faf8f3;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: auto;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow:
+        0 6px 20px rgba(139, 69, 19, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.add-to-cart-btn:hover {
+    background: linear-gradient(135deg, #cd853f, #deb887);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(139, 69, 19, 0.4);
+}
+
+.add-to-cart-btn.disabled {
+    background: #dc3545 !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
+.add-to-cart-btn.disabled:hover {
+    background: #dc3545 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.upload-btn {
+    background: linear-gradient(135deg, #8b4513, #cd853f);
+    color: #faf8f3;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 6px 20px rgba(139, 69, 19, 0.3);
+}
+
+.upload-btn:hover {
+    background: linear-gradient(135deg, #cd853f, #deb887);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(139, 69, 19, 0.4);
+}
+
+.analyze-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #8b4513, #cd853f, #deb887);
+    color: #faf8f3;
+    border: none;
+    padding: 1.5rem 2rem;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow:
+        0 8px 25px rgba(139, 69, 19, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.analyze-btn:hover {
+    background: linear-gradient(135deg, #cd853f, #deb887, #f5deb3);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(139, 69, 19, 0.4);
+}
+
+.analyze-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);
+}
+
+.analyze-btn.loading {
+    background: linear-gradient(135deg, #6b7280, #9ca3af);
+    cursor: not-allowed;
+    pointer-events: none;
+    color: transparent;
+}
+
+.analyze-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.quantity-btn {
+    background: linear-gradient(135deg, #cd853f, #deb887);
+    border: none;
+    color: #2c1810;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(139, 69, 19, 0.2);
+}
+
+.quantity-btn:hover {
+    background: linear-gradient(135deg, #deb887, #f5deb3);
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+}
+
+.remove-item-btn {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+    position: relative;
+}
+
+.remove-item-btn:hover {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+}
+
+.remove-item-btn::before {
+    content: '🗑️';
+    font-size: 0.8rem;
+}
+
+.close-cart {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #faf8f3;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.close-cart:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg) scale(1.1);
+}
+
+.close-modal {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(244, 241, 234, 0.2);
+    border: 2px solid #f4f1ea;
+    color: #f4f1ea;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.close-modal:hover {
+    background: rgba(244, 241, 234, 0.3);
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 15px rgba(244, 241, 234, 0.3);
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border: 2px solid #cd853f;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #3d2914;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.social-btn:hover {
+    border-color: #8b4513;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(139, 69, 19, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.total-actions .btn-primary {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.total-actions .btn-primary:hover {
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
