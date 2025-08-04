@@ -72,12 +72,6 @@ class Cart {
         ]);
     }
     
-    public function clearCart($userId) {
-        $sql = "DELETE FROM cart WHERE user_id = :user_id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([':user_id' => $userId]);
-    }
-    
     public function getCartTotal($userId) {
         $sql = "SELECT SUM(c.quantity * p.price) as total
                 FROM cart c 
