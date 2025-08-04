@@ -10,7 +10,7 @@ $cleanPath = strtok($path, '?');
 // Handle backend API requests
 if (strpos($cleanPath, '/backend/') === 0) {
     // Remove '/backend' from the path and serve from backend directory
-    $backendPath = '../backend' . substr($cleanPath, 8);
+    $backendPath = 'E:\BONDOK\Megasoft Task\Furniture_E-Shop\backend' . substr($cleanPath, 8);
     if (file_exists($backendPath)) {
         include $backendPath;
         return true;
