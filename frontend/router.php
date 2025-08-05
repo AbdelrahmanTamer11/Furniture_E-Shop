@@ -22,7 +22,7 @@ if ($cleanPath !== '/' && file_exists(__DIR__ . $cleanPath)) {
     return false; // Let PHP serve the static file
 }
 
-// For all other requests, serve index.html (SPA routing)
+// For all other requests, serve index.html 
 include __DIR__ . '/index.html';
 return true;
 ?>
