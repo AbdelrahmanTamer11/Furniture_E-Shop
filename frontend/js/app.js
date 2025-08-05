@@ -130,39 +130,47 @@ class FurnitureApp {
     }
 
     setupSearch() {
-        let searchTimeout;
-        let searchInput = document.querySelector('.search-input');
+    let searchTimeout;
+    let searchInput = document.querySelector('.search-input');
 
-        if (!searchInput) {
-            searchInput = document.createElement('input');
-            searchInput.type = 'text';
-            searchInput.placeholder = 'Search furniture...';
-            searchInput.className = 'search-input';
+    if (!searchInput) {
+        searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Search furniture...';
+        searchInput.className = 'search-input';
 
-            const navActions = document.querySelector('.nav-actions');
-            if (navActions) {
-                const searchContainer = document.createElement('div');
-                searchContainer.className = 'search-container';
-                searchContainer.appendChild(searchInput);
-                navActions.insertBefore(searchContainer, navActions.firstChild);
-            }
+        const navActions = document.querySelector('.nav-actions');
+        if (navActions) {
+            const searchContainer = document.createElement('div');
+            searchContainer.className = 'search-container';
+            searchContainer.appendChild(searchInput);
+            navActions.insertBefore(searchContainer, navActions.firstChild);
         }
+    }
 
-        searchInput.addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                this.filters.search = e.target.value.toLowerCase().trim();
-                this.filterProducts();
-            }, 300);
-        });
+    // Scroll to products section when search bar is clicked
+    searchInput.addEventListener('click', () => {
+        const productsSection = document.getElementById('productsByCategory');
+        if (productsSection) {
+            productsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
 
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                searchInput.value = '';
-                this.filters.search = '';
-                this.filterProducts();
-            }
-        });
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            this.filters.search = e.target.value.toLowerCase().trim();
+            this.filterProducts();
+        }, 300);
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            this.filters.search = '';
+            this.filterProducts();
+        }
+    });
     }
 
     handleResize() {
