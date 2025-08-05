@@ -17,7 +17,7 @@ require_once __DIR__ . '/../config/config.php';
 $method = $_SERVER['REQUEST_METHOD'];
 $input = json_decode(file_get_contents('php://input'), true);
 
-// Get user from JWT token
+// Get user from token
 function getUserFromToken() {
     // Try multiple header formats
     $headers = array_change_key_case(getallheaders(), CASE_LOWER);

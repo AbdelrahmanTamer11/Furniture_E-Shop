@@ -14,7 +14,7 @@ require_once __DIR__ . '/../models/Order.php';
 require_once __DIR__ . '/../models/Cart.php';
 require_once __DIR__ . '/../config/config.php';
 
-// Get user from JWT token
+// Get user from token
 function getUserFromToken() {
     $headers = array_change_key_case(getallheaders(), CASE_LOWER);
     $authHeader = $headers['authorization'] ?? '';

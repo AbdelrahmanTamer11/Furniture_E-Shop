@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Authenticate user (temporarily disabled for testing)
+// Authenticate user 
 $headers = getallheaders();
 $token = $headers['Authorization'] ?? '';
 
@@ -103,7 +103,6 @@ try {
     }
     
     // Process AI response and match with products
-    //$aiAnalysis = new AIAnalysis();
     $productModel = new Product();
     
     $processedResponse = processAIResponse($aiResponse, $productModel);
@@ -123,7 +122,6 @@ try {
     
     echo json_encode([
         'success' => true,
-        //'analysis_id' => $analysisId,
         'suggestions' => $processedResponse['suggestions'],
         'total_cost' => $processedResponse['total_cost'],
         'style_analysis' => $aiResponse['style_analysis'] ?? 'Room analysis completed.',

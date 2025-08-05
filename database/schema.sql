@@ -1,6 +1,6 @@
 -- FurniVision - AI-Enhanced Furniture E-Shop Database Schema 
 
--- Users table with balance and constraints
+-- Users table
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`)
 );
 
--- Categories table with self-referencing constraint
+-- Categories table 
 CREATE TABLE `categories` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE `categories` (
   CONSTRAINT `categories_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL
 );
 
--- Products table with category constraint and indexes
+-- Products table 
 CREATE TABLE `products` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE `products` (
   CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL
 );
 
--- Cart table with user and product constraints
+-- Cart table 
 CREATE TABLE `cart` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE `cart` (
   CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
 );
 
--- Orders table with user constraint
+-- Orders 
 CREATE TABLE `orders` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
@@ -91,8 +91,7 @@ CREATE TABLE `orders` (
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 );
 
--- Order items table with order and product constraints
-CREATE TABLE `order_items` (
+-- Order items CREATE TABLE `order_items` (
   `id` int NOT NULL AUTO_INCREMENT,
   `order_id` int NOT NULL,
   `product_id` int NOT NULL,
@@ -106,7 +105,7 @@ CREATE TABLE `order_items` (
   CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
 ); 
 
--- Room analysis table for AI functionality
+-- Room analysis table 
 CREATE TABLE `room_analysis` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
@@ -122,7 +121,7 @@ CREATE TABLE `room_analysis` (
   CONSTRAINT `room_analysis_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ); 
 
--- User sessions table for authentication
+-- User sessions table 
 CREATE TABLE `user_sessions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
